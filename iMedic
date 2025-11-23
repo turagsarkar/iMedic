@@ -1,1 +1,1142 @@
-{"metadata":{"kernelspec":{"language":"python","display_name":"Python 3","name":"python3"},"language_info":{"name":"python","version":"3.11.13","mimetype":"text/x-python","codemirror_mode":{"name":"ipython","version":3},"pygments_lexer":"ipython3","nbconvert_exporter":"python","file_extension":".py"},"kaggle":{"accelerator":"none","dataSources":[],"dockerImageVersionId":31192,"isInternetEnabled":true,"language":"python","sourceType":"notebook","isGpuEnabled":false}},"nbformat_minor":4,"nbformat":4,"cells":[{"cell_type":"code","source":"import os\nfrom kaggle_secrets import UserSecretsClient\n\ntry:\n    GOOGLE_API_KEY = UserSecretsClient().get_secret(\"GOOGLE_API_KEY\")\n    os.environ[\"GOOGLE_API_KEY\"] = GOOGLE_API_KEY\n    print(\"✅ Gemini API key setup complete.\")\nexcept Exception as e:\n    print(\n        f\"🔑 Authentication Error: Please make sure you have added 'GOOGLE_API_KEY' to your Kaggle secrets. Details: {e}\"\n    )","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.272278Z","iopub.execute_input":"2025-11-23T22:38:52.272590Z","iopub.status.idle":"2025-11-23T22:38:52.414795Z","shell.execute_reply.started":"2025-11-23T22:38:52.272567Z","shell.execute_reply":"2025-11-23T22:38:52.413946Z"}},"outputs":[{"name":"stdout","text":"✅ Gemini API key setup complete.\n","output_type":"stream"}],"execution_count":99},{"cell_type":"code","source":"from google.adk.agents import Agent\nfrom google.adk.models.google_llm import Gemini\nfrom google.adk.runners import InMemoryRunner\nfrom google.adk.tools import google_search, AgentTool, ToolContext\nfrom google.genai import types\nfrom google.adk.agents import LlmAgent\nfrom google.adk.sessions import InMemorySessionService\n\nprint(\"✅ ADK components imported successfully.\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.416306Z","iopub.execute_input":"2025-11-23T22:38:52.416598Z","iopub.status.idle":"2025-11-23T22:38:52.422544Z","shell.execute_reply.started":"2025-11-23T22:38:52.416575Z","shell.execute_reply":"2025-11-23T22:38:52.421485Z"}},"outputs":[{"name":"stdout","text":"✅ ADK components imported successfully.\n","output_type":"stream"}],"execution_count":100},{"cell_type":"code","source":"import uuid\nfrom google.genai import types\n\nfrom google.adk.agents import LlmAgent\nfrom google.adk.models.google_llm import Gemini\nfrom google.adk.runners import Runner\nfrom google.adk.sessions import InMemorySessionService\n\nfrom google.adk.tools.mcp_tool.mcp_toolset import McpToolset\nfrom google.adk.tools.tool_context import ToolContext\nfrom google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams\nfrom mcp import StdioServerParameters\n\nfrom google.adk.apps.app import App, ResumabilityConfig\nfrom google.adk.tools.function_tool import FunctionTool\n\nprint(\"✅ ADK components imported successfully.\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.423447Z","iopub.execute_input":"2025-11-23T22:38:52.423782Z","iopub.status.idle":"2025-11-23T22:38:52.444962Z","shell.execute_reply.started":"2025-11-23T22:38:52.423754Z","shell.execute_reply":"2025-11-23T22:38:52.443877Z"}},"outputs":[{"name":"stdout","text":"✅ ADK components imported successfully.\n","output_type":"stream"}],"execution_count":101},{"cell_type":"code","source":"# Define helper functions that will be reused throughout the notebook\n\nfrom IPython.core.display import display, HTML\nfrom jupyter_server.serverapp import list_running_servers\n\n\n# Gets the proxied URL in the Kaggle Notebooks environment\ndef get_adk_proxy_url():\n    PROXY_HOST = \"https://kkb-production.jupyter-proxy.kaggle.net\"\n    ADK_PORT = \"8000\"\n\n    servers = list(list_running_servers())\n    if not servers:\n        raise Exception(\"No running Jupyter servers found.\")\n\n    baseURL = servers[0][\"base_url\"]\n\n    try:\n        path_parts = baseURL.split(\"/\")\n        kernel = path_parts[2]\n        token = path_parts[3]\n    except IndexError:\n        raise Exception(f\"Could not parse kernel/token from base URL: {baseURL}\")\n\n    url_prefix = f\"/k/{kernel}/{token}/proxy/proxy/{ADK_PORT}\"\n    url = f\"{PROXY_HOST}{url_prefix}\"\n\n    styled_html = f\"\"\"\n    <div style=\"padding: 15px; border: 2px solid #f0ad4e; border-radius: 8px; background-color: #fef9f0; margin: 20px 0;\">\n        <div style=\"font-family: sans-serif; margin-bottom: 12px; color: #333; font-size: 1.1em;\">\n            <strong>⚠️ IMPORTANT: Action Required</strong>\n        </div>\n        <div style=\"font-family: sans-serif; margin-bottom: 15px; color: #333; line-height: 1.5;\">\n            The ADK web UI is <strong>not running yet</strong>. You must start it in the next cell.\n            <ol style=\"margin-top: 10px; padding-left: 20px;\">\n                <li style=\"margin-bottom: 5px;\"><strong>Run the next cell</strong> (the one with <code>!adk web ...</code>) to start the ADK web UI.</li>\n                <li style=\"margin-bottom: 5px;\">Wait for that cell to show it is \"Running\" (it will not \"complete\").</li>\n                <li>Once it's running, <strong>return to this button</strong> and click it to open the UI.</li>\n            </ol>\n            <em style=\"font-size: 0.9em; color: #555;\">(If you click the button before running the next cell, you will get a 500 error.)</em>\n        </div>\n        <a href='{url}' target='_blank' style=\"\n            display: inline-block; background-color: #1a73e8; color: white; padding: 10px 20px;\n            text-decoration: none; border-radius: 25px; font-family: sans-serif; font-weight: 500;\n            box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: all 0.2s ease;\">\n            Open ADK Web UI (after running cell below) ↗\n        </a>\n    </div>\n    \"\"\"\n\n    display(HTML(styled_html))\n\n    return url_prefix\n\n\nprint(\"✅ Helper functions defined.\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.446965Z","iopub.execute_input":"2025-11-23T22:38:52.447227Z","iopub.status.idle":"2025-11-23T22:38:52.471134Z","shell.execute_reply.started":"2025-11-23T22:38:52.447206Z","shell.execute_reply":"2025-11-23T22:38:52.470230Z"}},"outputs":[{"name":"stdout","text":"✅ Helper functions defined.\n","output_type":"stream"}],"execution_count":102},{"cell_type":"code","source":"retry_config=types.HttpRetryOptions(\n    attempts=5,  # Maximum retry attempts\n    exp_base=7,  # Delay multiplier\n    initial_delay=1, # Initial delay before first retry (in seconds)\n    http_status_codes=[429, 500, 503, 504] # Retry on these HTTP errors\n)","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.472073Z","iopub.execute_input":"2025-11-23T22:38:52.472354Z","iopub.status.idle":"2025-11-23T22:38:52.495076Z","shell.execute_reply.started":"2025-11-23T22:38:52.472326Z","shell.execute_reply":"2025-11-23T22:38:52.494065Z"}},"outputs":[],"execution_count":103},{"cell_type":"code","source":"iMedic = Agent(\n    name=\"iMedic\",\n    model=Gemini(\n        model=\"gemini-2.5-flash-lite\",\n        retry_options=retry_config\n    ),\n    description=\"A simple agent that can answer general questions.\",\n    instruction=\"You are a helpful assistant. Use Google Search for current info or if unsure.\",\n    tools=[google_search],\n)\n\nprint(\"✅ Root Agent defined.\")\n","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.496132Z","iopub.execute_input":"2025-11-23T22:38:52.496351Z","iopub.status.idle":"2025-11-23T22:38:52.514051Z","shell.execute_reply.started":"2025-11-23T22:38:52.496332Z","shell.execute_reply":"2025-11-23T22:38:52.513135Z"}},"outputs":[{"name":"stdout","text":"✅ Root Agent defined.\n","output_type":"stream"}],"execution_count":104},{"cell_type":"code","source":"from datetime import datetime\n\n# Simple in-memory database (You can replace this with a real DB)\nappointments = []\n\ndef book_doctor_appointment(patient_name: str,\n                            doctor_name: str,\n                            date: str,\n                            time: str,\n                            symptoms: str = \"\") -> dict:\n    \"\"\"\n    Book a doctor appointment with validation.\n    \n    Args:\n        patient_name (str): Name of the patient.\n        doctor_name (str): Name of the doctor.\n        date (str): Appointment date in YYYY-MM-DD format.\n        time (str): Appointment time in HH:MM (24hr) format.\n        symptoms (str): Optional - patient's symptoms.\n\n    Returns:\n        dict: Confirmation or error message.\n    \"\"\"\n\n    # Validate date\n    try:\n        appointment_date = datetime.strptime(date, \"%Y-%m-%d\").date()\n    except ValueError:\n        return {\"status\": \"error\", \"message\": \"Invalid date format. Use YYYY-MM-DD\"}\n\n    # Validate time\n    try:\n        appointment_time = datetime.strptime(time, \"%H:%M\").time()\n    except ValueError:\n        return {\"status\": \"error\", \"message\": \"Invalid time format. Use HH:MM (24hr)\"}\n\n    # Check if time slot is already booked\n    for appt in appointments:\n        if (appt[\"doctor_name\"].lower() == doctor_name.lower() and\n            appt[\"date\"] == date and\n            appt[\"time\"] == time):\n            return {\n                \"status\": \"error\",\n                \"message\": f\"Doctor {doctor_name} is already booked at {time} on {date}.\"\n            }\n\n    # Save appointment\n    appointment = {\n        \"patient_name\": patient_name,\n        \"doctor_name\": doctor_name,\n        \"date\": date,\n        \"time\": time,\n        \"symptoms\": symptoms\n    }\n\n    appointments.append(appointment)\n\n    return {\n        \"status\": \"success\",\n        \"message\": \"Appointment booked successfully!\",\n        \"appointment\": appointment\n    }\n\n\n# Example usage:\n\nprint(\"sucessfull\")\nprint(book_doctor_appointment(\"John Doe\", \"Dr. Rahim\", \"2025-01-10\", \"14:30\", \"Headache\"))","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.516008Z","iopub.execute_input":"2025-11-23T22:38:52.516246Z","iopub.status.idle":"2025-11-23T22:38:52.533220Z","shell.execute_reply.started":"2025-11-23T22:38:52.516228Z","shell.execute_reply":"2025-11-23T22:38:52.532307Z"}},"outputs":[{"name":"stdout","text":"sucessfull\n{'status': 'success', 'message': 'Appointment booked successfully!', 'appointment': {'patient_name': 'John Doe', 'doctor_name': 'Dr. Rahim', 'date': '2025-01-10', 'time': '14:30', 'symptoms': 'Headache'}}\n","output_type":"stream"}],"execution_count":105},{"cell_type":"code","source":"# booking agent with custom function tools\nbooking_agent = LlmAgent(\n    name=\"booking_agent\",\n    model=Gemini(model=\"gemini-2.5-flash-lite\", retry_options=retry_config),\n    instruction=\"\"\"You are a smart booking agent assistant.\n\n    For currency conversion requests:\n    1. Use `book_doctor_appointment()` for booking\n    3. Check the \"status\" field in each tool's response for errors\n    4.If any tool returns status \"error\", explain the issue to the user clearly.\n    5. give the result json formet\n    6. after booking the appoinment give it json formet\n    \"\"\",\n    tools=[book_doctor_appointment],\n)\n\nprint(\"✅ Doctor booking agent created with custom function tools\")\nprint(\"🔧 Available tools:\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.534123Z","iopub.execute_input":"2025-11-23T22:38:52.534371Z","iopub.status.idle":"2025-11-23T22:38:52.557161Z","shell.execute_reply.started":"2025-11-23T22:38:52.534350Z","shell.execute_reply":"2025-11-23T22:38:52.556184Z"}},"outputs":[{"name":"stdout","text":"✅ Doctor booking agent created with custom function tools\n🔧 Available tools:\n","output_type":"stream"}],"execution_count":106},{"cell_type":"code","source":"# Test the booking agent\nrunner = InMemoryRunner(agent=booking_agent)\nprint(\"✅ Runner created.\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.558250Z","iopub.execute_input":"2025-11-23T22:38:52.558552Z","iopub.status.idle":"2025-11-23T22:38:52.579104Z","shell.execute_reply.started":"2025-11-23T22:38:52.558522Z","shell.execute_reply":"2025-11-23T22:38:52.577914Z"}},"outputs":[{"name":"stdout","text":"✅ Runner created.\n","output_type":"stream"}],"execution_count":107},{"cell_type":"code","source":"#response = await runner.run_debug(\" book a doctor\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.580117Z","iopub.execute_input":"2025-11-23T22:38:52.580419Z","iopub.status.idle":"2025-11-23T22:38:52.594846Z","shell.execute_reply.started":"2025-11-23T22:38:52.580384Z","shell.execute_reply":"2025-11-23T22:38:52.593884Z"}},"outputs":[],"execution_count":108},{"cell_type":"code","source":"#response = await runner.run_debug(\"How to add this info\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.595931Z","iopub.execute_input":"2025-11-23T22:38:52.596160Z","iopub.status.idle":"2025-11-23T22:38:52.611807Z","shell.execute_reply.started":"2025-11-23T22:38:52.596142Z","shell.execute_reply":"2025-11-23T22:38:52.610850Z"}},"outputs":[],"execution_count":109},{"cell_type":"code","source":"response = await runner.run_debug(\"Kaykubad Dr. saynoor 2025/10/24 9.00AM skinissues\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:52.612866Z","iopub.execute_input":"2025-11-23T22:38:52.613235Z","iopub.status.idle":"2025-11-23T22:38:53.616914Z","shell.execute_reply.started":"2025-11-23T22:38:52.613205Z","shell.execute_reply":"2025-11-23T22:38:53.615868Z"}},"outputs":[{"name":"stdout","text":"\n ### Created new session: debug_session_id\n\nUser > Kaykubad Dr. saynoor 2025/10/24 9.00AM skinissues\n","output_type":"stream"},{"name":"stderr","text":"WARNING:google_genai.types:Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.\n","output_type":"stream"},{"name":"stdout","text":"booking_agent > ```json\n{\n  \"appointment\": {\n    \"date\": \"2025-10-24\",\n    \"doctor_name\": \"Dr. saynoor\",\n    \"patient_name\": \"Kaykubad\",\n    \"symptoms\": \"skinissues\",\n    \"time\": \"09:00\"\n  },\n  \"message\": \"Appointment booked successfully!\",\n  \"status\": \"success\"\n}\n```\n\n","output_type":"stream"}],"execution_count":110},{"cell_type":"code","source":"import uuid\nfrom datetime import datetime\n\n# Fake medicine inventory (replace with database in real app)\nmedicine_inventory = {\n    \"Paracetamol 500mg\": {\"price\": 5.0, \"stock\": 50},\n    \"Aspirin 300mg\": {\"price\": 8.0, \"stock\": 20},\n    \"Amoxicillin 250mg\": {\"price\": 15.0, \"stock\": 10},\n    \"Cetirizine 10mg\": {\"price\": 3.0, \"stock\": 40},\n}\n\norders = []\n\n\ndef book_medicine_online(customer_name: str,\n                         medicine_name: str,\n                         quantity: int,\n                         address: str,\n                         phone: str):\n    \"\"\"\n    Book/order medicine online with stock validation and 5% service charge.\n    \"\"\"\n\n    # Validate input\n    if quantity <= 0:\n        return {\"status\": \"error\", \"message\": \"Quantity must be greater than zero.\"}\n\n    if medicine_name not in medicine_inventory:\n        return {\"status\": \"error\", \"message\": f\"{medicine_name} not found in inventory.\"}\n\n    med = medicine_inventory[medicine_name]\n\n    # Stock check\n    if quantity > med[\"stock\"]:\n        return {\n            \"status\": \"error\",\n            \"message\": f\"Only {med['stock']} units of {medicine_name} available.\"\n        }\n\n    # Base price\n    base_price = quantity * med[\"price\"]\n\n    # Service charge 5%\n    service_charge = base_price * 0.05\n\n    # Final total\n    total_price = base_price + service_charge\n\n    # Update stock\n    medicine_inventory[medicine_name][\"stock\"] -= quantity\n\n    # Order data\n    order = {\n        \"order_id\": str(uuid.uuid4()),\n        \"customer_name\": customer_name,\n        \"medicine_name\": medicine_name,\n        \"quantity\": quantity,\n        \"base_price\": base_price,\n        \"service_charge_5_percent\": service_charge,\n        \"total_price\": total_price,\n        \"address\": address,\n        \"phone\": phone,\n        \"order_time\": datetime.now().isoformat()\n    }\n\n    orders.append(order)\n\n    return {\n        \"status\": \"success\",\n        \"message\": \"Medicine ordered successfully!\",\n        \"order\": order\n    }\n\n","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:53.617851Z","iopub.execute_input":"2025-11-23T22:38:53.618147Z","iopub.status.idle":"2025-11-23T22:38:53.626747Z","shell.execute_reply.started":"2025-11-23T22:38:53.618119Z","shell.execute_reply":"2025-11-23T22:38:53.625812Z"}},"outputs":[],"execution_count":111},{"cell_type":"code","source":"# ---------- TEST ----------\nprint(book_medicine_online(\n    \"John Doe\",\n    \"Paracetamol 500mg\",\n    3,\n    \"Dhaka, Bangladesh\",\n    \"017xxxxxxxx\"\n))","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:53.627730Z","iopub.execute_input":"2025-11-23T22:38:53.627945Z","iopub.status.idle":"2025-11-23T22:38:53.650434Z","shell.execute_reply.started":"2025-11-23T22:38:53.627928Z","shell.execute_reply":"2025-11-23T22:38:53.649392Z"}},"outputs":[{"name":"stdout","text":"{'status': 'success', 'message': 'Medicine ordered successfully!', 'order': {'order_id': 'd1192978-7d9c-4186-a483-358bbcc7fc2e', 'customer_name': 'John Doe', 'medicine_name': 'Paracetamol 500mg', 'quantity': 3, 'base_price': 15.0, 'service_charge_5_percent': 0.75, 'total_price': 15.75, 'address': 'Dhaka, Bangladesh', 'phone': '017xxxxxxxx', 'order_time': '2025-11-23T22:38:53.646828'}}\n","output_type":"stream"}],"execution_count":112},{"cell_type":"code","source":"# booking agent with custom function tools\nmedicbooking_agent = LlmAgent(\n    name=\"medicbooking_agent\",\n    model=Gemini(model=\"gemini-2.5-flash-lite\", retry_options=retry_config),\n    instruction=\"\"\"You are a smart booking agent assistant.\n\n    For medicine order conversion requests:\n    1. Use `book_medicine_online()` for booking\n    3. Check the \"status\" field in each tool's response for errors\n    4.If any tool returns status \"error\", explain the issue to the user clearly.\n    5. give the result json formet\n    6. ask everything and accept the data\n    6. after confirm the order give it json formet with its service charge result and suceessful message.\n    \"\"\",\n    tools=[book_medicine_online],\n)\nrunner = InMemoryRunner(agent=medicbooking_agent)\nprint(\"✅ Runner created.\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:53.651695Z","iopub.execute_input":"2025-11-23T22:38:53.652014Z","iopub.status.idle":"2025-11-23T22:38:53.670434Z","shell.execute_reply.started":"2025-11-23T22:38:53.651981Z","shell.execute_reply":"2025-11-23T22:38:53.669549Z"}},"outputs":[{"name":"stdout","text":"✅ Runner created.\n","output_type":"stream"}],"execution_count":113},{"cell_type":"code","source":"response = await runner.run_debug(\"how to order medicine\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:53.671353Z","iopub.execute_input":"2025-11-23T22:38:53.671821Z","iopub.status.idle":"2025-11-23T22:38:54.438496Z","shell.execute_reply.started":"2025-11-23T22:38:53.671788Z","shell.execute_reply":"2025-11-23T22:38:54.437707Z"}},"outputs":[{"name":"stdout","text":"\n ### Created new session: debug_session_id\n\nUser > how to order medicine\nmedicbooking_agent > I can help you with that! What is your name, what medicine do you want to order, what quantity, and where should it be delivered? Please also provide your phone number.\n","output_type":"stream"}],"execution_count":114},{"cell_type":"code","source":"response = await runner.run_debug(\"turag Paracetamol 500mg 5pcs Dhaka 019888888\")\n                                            ","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:54.439245Z","iopub.execute_input":"2025-11-23T22:38:54.439459Z","iopub.status.idle":"2025-11-23T22:38:54.750804Z","shell.execute_reply.started":"2025-11-23T22:38:54.439439Z","shell.execute_reply":"2025-11-23T22:38:54.749863Z"}},"outputs":[{"name":"stdout","text":"\n ### Continue session: debug_session_id\n\nUser > turag Paracetamol 500mg 5pcs Dhaka 019888888\nmedicbooking_agent > Could you please provide your name?\n","output_type":"stream"}],"execution_count":115},{"cell_type":"code","source":"response = await runner.run_debug('confirm this')","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:54.751843Z","iopub.execute_input":"2025-11-23T22:38:54.752121Z","iopub.status.idle":"2025-11-23T22:38:55.109702Z","shell.execute_reply.started":"2025-11-23T22:38:54.752091Z","shell.execute_reply":"2025-11-23T22:38:55.108759Z"}},"outputs":[{"name":"stdout","text":"\n ### Continue session: debug_session_id\n\nUser > confirm this\nmedicbooking_agent > Could you please provide your name?\n","output_type":"stream"}],"execution_count":116},{"cell_type":"code","source":"medical_booking_order_agent = LlmAgent(\n    name=\"medical_booking_order_agent\",\n    model=Gemini(model=\"gemini-2.5-flash-lite\", retry_options=retry_config),\n    # Updated instruction\n    instruction=\"\"\"You are a smart doctor booking and medicine order assistant. You must strictly follow these steps and use the available tools.\n\n  For any doctor booking or medicine order conversion request:\n\n   1. for doctor booking: Use the book_doctor_appointment() tool to book the doctor for patient.\n   2. for medicine order : Use the book_medicine_online() tool to confirm the order.\n   3. Error Check: After each tool call, you must check the \"status\" field in the response. If the status is \"error\", you must stop and clearly explain the issue to the user.\n   4. Provide Detailed Breakdown: In your summary, you must:\n       * State the final result in json formet.\n       * Explain how the result was how it work, including:\n           * The fee percentage and the fee amount \n    \"\"\",\n    tools=[book_doctor_appointment,\n           book_medicine_online,\n        AgentTool(agent=iMedic),  # Using another agent as a tool!\n    ],\n)","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:55.110751Z","iopub.execute_input":"2025-11-23T22:38:55.111177Z","iopub.status.idle":"2025-11-23T22:38:55.116569Z","shell.execute_reply.started":"2025-11-23T22:38:55.111149Z","shell.execute_reply":"2025-11-23T22:38:55.115651Z"}},"outputs":[],"execution_count":117},{"cell_type":"code","source":"runner = InMemoryRunner(agent=medical_booking_order_agent)\nprint(\"✅ Runner created.\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:38:55.117638Z","iopub.execute_input":"2025-11-23T22:38:55.117953Z","iopub.status.idle":"2025-11-23T22:38:55.140086Z","shell.execute_reply.started":"2025-11-23T22:38:55.117921Z","shell.execute_reply":"2025-11-23T22:38:55.139141Z"}},"outputs":[{"name":"stdout","text":"✅ Runner created.\n","output_type":"stream"}],"execution_count":118},{"cell_type":"code","source":"response = await runner.run_debug(\"what is your agent name?\")","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:49:53.259303Z","iopub.execute_input":"2025-11-23T22:49:53.260051Z","iopub.status.idle":"2025-11-23T22:49:53.777308Z","shell.execute_reply.started":"2025-11-23T22:49:53.260017Z","shell.execute_reply":"2025-11-23T22:49:53.776269Z"}},"outputs":[{"name":"stdout","text":"\n ### Continue session: debug_session_id\n\nUser > what is your agent name?\nmedical_booking_order_agent > My agent name is medical_booking_order_agent.\n","output_type":"stream"}],"execution_count":131},{"cell_type":"code","source":"#!adk create medical_booking_order_agent --model gemini-2.5-flash-lite --api_key $GOOGLE_API_KEY","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:42:32.300838Z","iopub.execute_input":"2025-11-23T22:42:32.301149Z","iopub.status.idle":"2025-11-23T22:42:56.433128Z","shell.execute_reply.started":"2025-11-23T22:42:32.301125Z","shell.execute_reply":"2025-11-23T22:42:56.431987Z"}},"outputs":[{"name":"stdout","text":"\u001b[32m\nAgent created in /kaggle/working/medical_booking_order_agent:\n- .env\n- __init__.py\n- agent.py\n\u001b[0m\n","output_type":"stream"}],"execution_count":128},{"cell_type":"code","source":"#url_prefix = get_adk_proxy_url()","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:43:37.657708Z","iopub.execute_input":"2025-11-23T22:43:37.658844Z","iopub.status.idle":"2025-11-23T22:43:37.665942Z","shell.execute_reply.started":"2025-11-23T22:43:37.658807Z","shell.execute_reply":"2025-11-23T22:43:37.665015Z"}},"outputs":[{"output_type":"display_data","data":{"text/plain":"<IPython.core.display.HTML object>","text/html":"\n    <div style=\"padding: 15px; border: 2px solid #f0ad4e; border-radius: 8px; background-color: #fef9f0; margin: 20px 0;\">\n        <div style=\"font-family: sans-serif; margin-bottom: 12px; color: #333; font-size: 1.1em;\">\n            <strong>⚠️ IMPORTANT: Action Required</strong>\n        </div>\n        <div style=\"font-family: sans-serif; margin-bottom: 15px; color: #333; line-height: 1.5;\">\n            The ADK web UI is <strong>not running yet</strong>. You must start it in the next cell.\n            <ol style=\"margin-top: 10px; padding-left: 20px;\">\n                <li style=\"margin-bottom: 5px;\"><strong>Run the next cell</strong> (the one with <code>!adk web ...</code>) to start the ADK web UI.</li>\n                <li style=\"margin-bottom: 5px;\">Wait for that cell to show it is \"Running\" (it will not \"complete\").</li>\n                <li>Once it's running, <strong>return to this button</strong> and click it to open the UI.</li>\n            </ol>\n            <em style=\"font-size: 0.9em; color: #555;\">(If you click the button before running the next cell, you will get a 500 error.)</em>\n        </div>\n        <a href='https://kkb-production.jupyter-proxy.kaggle.net/k/281274539/eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwidHlwIjoiSldUIn0..13-B9-aSgGYzwHPARjmUuA.2Q-23BsgoNArmlLwV9QTP9CGd0jGViXsRZpEqR94aSmz50ukz8-H_Wnw7c8yJE7eXSmwNRptZkjwdPmI1Ngf-APBtVW-uurqu0tcdO5xEGvWg-Z8kUfCKVtNfkUFaXUjdc3GaLB9rbw7M2iSDb9pq3wwchYEwbHkcPg-hJz5y_qYXu2pDjJbbBE0FapfiKBHySJISq6Iuq_A4VAUWsP5-mEvOT2WqsCBxaRLARkyWHdLMnwGwWFfCkTs5TZAwdwH.0zr81pg-9fVU8-6vN0wyZw/proxy/proxy/8000' target='_blank' style=\"\n            display: inline-block; background-color: #1a73e8; color: white; padding: 10px 20px;\n            text-decoration: none; border-radius: 25px; font-family: sans-serif; font-weight: 500;\n            box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: all 0.2s ease;\">\n            Open ADK Web UI (after running cell below) ↗\n        </a>\n    </div>\n    "},"metadata":{}}],"execution_count":129},{"cell_type":"code","source":"#!adk web --url_prefix {url_prefix}","metadata":{"trusted":true,"execution":{"iopub.status.busy":"2025-11-23T22:43:40.052222Z","iopub.execute_input":"2025-11-23T22:43:40.053258Z","iopub.status.idle":"2025-11-23T22:46:45.649006Z","shell.execute_reply.started":"2025-11-23T22:43:40.053218Z","shell.execute_reply":"2025-11-23T22:46:45.647940Z"}},"outputs":[{"name":"stdout","text":"/usr/local/lib/python3.11/dist-packages/google/adk/cli/fast_api.py:130: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.\n  credential_service = InMemoryCredentialService()\n/usr/local/lib/python3.11/dist-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.\n  super().__init__()\n\u001b[32mINFO\u001b[0m:     Started server process [\u001b[36m174\u001b[0m]\n\u001b[32mINFO\u001b[0m:     Waiting for application startup.\n\u001b[32m\n+-----------------------------------------------------------------------------+\n| ADK Web Server started                                                      |\n|                                                                             |\n| For local testing, access at http://127.0.0.1:8000.                         |\n+-----------------------------------------------------------------------------+\n\u001b[0m\n\u001b[32mINFO\u001b[0m:     Application startup complete.\n\u001b[32mINFO\u001b[0m:     Uvicorn running on \u001b[1mhttp://127.0.0.1:8000\u001b[0m (Press CTRL+C to quit)\n\u001b[32mINFO\u001b[0m:     35.191.59.106:0 - \"\u001b[1mGET / HTTP/1.1\u001b[0m\" \u001b[33m307 Temporary Redirect\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.59.104:0 - \"\u001b[1mGET /dev-ui/assets/config/runtime-config.json HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.59.107:0 - \"\u001b[1mGET /list-apps?relative_path=./ HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\nINFO:google_adk.google.adk.cli.adk_web_server:New session created: fdd9bac8-ee38-4839-8cab-1948e2672803\n\u001b[32mINFO\u001b[0m:     35.191.59.105:0 - \"\u001b[1mPOST /apps/medical_booking_order_agent/users/user/sessions HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.59.106:0 - \"\u001b[1mGET /builder/app/medical_booking_order_agent?ts=1763937914591 HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.59.107:0 - \"\u001b[1mGET /apps/medical_booking_order_agent/users/user/sessions/fdd9bac8-ee38-4839-8cab-1948e2672803 HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.59.105:0 - \"\u001b[1mGET /apps/medical_booking_order_agent/users/user/sessions HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.59.106:0 - \"\u001b[1mGET /debug/trace/session/fdd9bac8-ee38-4839-8cab-1948e2672803 HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'alias' attribute with value 'appName' was provided to the `Field()` function, which has no effect in the context it was used. 'alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'validation_alias' attribute with value 'appName' was provided to the `Field()` function, which has no effect in the context it was used. 'validation_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'serialization_alias' attribute with value 'appName' was provided to the `Field()` function, which has no effect in the context it was used. 'serialization_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'alias' attribute with value 'userId' was provided to the `Field()` function, which has no effect in the context it was used. 'alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'validation_alias' attribute with value 'userId' was provided to the `Field()` function, which has no effect in the context it was used. 'validation_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'serialization_alias' attribute with value 'userId' was provided to the `Field()` function, which has no effect in the context it was used. 'serialization_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'alias' attribute with value 'sessionId' was provided to the `Field()` function, which has no effect in the context it was used. 'alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'validation_alias' attribute with value 'sessionId' was provided to the `Field()` function, which has no effect in the context it was used. 'validation_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'serialization_alias' attribute with value 'sessionId' was provided to the `Field()` function, which has no effect in the context it was used. 'serialization_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'alias' attribute with value 'newMessage' was provided to the `Field()` function, which has no effect in the context it was used. 'alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'validation_alias' attribute with value 'newMessage' was provided to the `Field()` function, which has no effect in the context it was used. 'validation_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'serialization_alias' attribute with value 'newMessage' was provided to the `Field()` function, which has no effect in the context it was used. 'serialization_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'alias' attribute with value 'streaming' was provided to the `Field()` function, which has no effect in the context it was used. 'alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'validation_alias' attribute with value 'streaming' was provided to the `Field()` function, which has no effect in the context it was used. 'validation_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'serialization_alias' attribute with value 'streaming' was provided to the `Field()` function, which has no effect in the context it was used. 'serialization_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'alias' attribute with value 'stateDelta' was provided to the `Field()` function, which has no effect in the context it was used. 'alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'validation_alias' attribute with value 'stateDelta' was provided to the `Field()` function, which has no effect in the context it was used. 'validation_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'serialization_alias' attribute with value 'stateDelta' was provided to the `Field()` function, which has no effect in the context it was used. 'serialization_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'alias' attribute with value 'invocationId' was provided to the `Field()` function, which has no effect in the context it was used. 'alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'validation_alias' attribute with value 'invocationId' was provided to the `Field()` function, which has no effect in the context it was used. 'validation_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n/usr/local/lib/python3.11/dist-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'serialization_alias' attribute with value 'invocationId' was provided to the `Field()` function, which has no effect in the context it was used. 'serialization_alias' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.\n  warnings.warn(\n\u001b[32mINFO\u001b[0m:     35.191.59.107:0 - \"\u001b[1mPOST /run_sse HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\nINFO:google_adk.google.adk.cli.utils.agent_loader:Found root_agent in medical_booking_order_agent.agent\nINFO:google_adk.google.adk.models.google_llm:Sending out request, model: gemini-2.5-flash-lite, backend: GoogleLLMVariant.GEMINI_API, stream: False\nINFO:google_adk.google.adk.models.google_llm:Response received from the model.\n\u001b[32mINFO\u001b[0m:     35.191.59.126:0 - \"\u001b[1mGET /apps/medical_booking_order_agent/users/user/sessions/fdd9bac8-ee38-4839-8cab-1948e2672803 HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.59.127:0 - \"\u001b[1mGET /debug/trace/session/fdd9bac8-ee38-4839-8cab-1948e2672803 HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.59.124:0 - \"\u001b[1mGET /debug/trace/session/fdd9bac8-ee38-4839-8cab-1948e2672803 HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\nINFO:google_adk.google.adk.cli.adk_web_server:New session created: 173cac48-9ed7-4591-99c6-1cf587d3d200\n\u001b[32mINFO\u001b[0m:     35.191.71.30:0 - \"\u001b[1mPOST /apps/sample-agent/users/user/sessions HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.71.28:0 - \"\u001b[1mGET /builder/app/sample-agent?ts=1763937994433 HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.71.29:0 - \"\u001b[1mGET /apps/sample-agent/users/user/sessions HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.71.31:0 - \"\u001b[1mGET /apps/sample-agent/users/user/sessions/173cac48-9ed7-4591-99c6-1cf587d3d200 HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n\u001b[32mINFO\u001b[0m:     35.191.71.28:0 - \"\u001b[1mGET /debug/trace/session/173cac48-9ed7-4591-99c6-1cf587d3d200 HTTP/1.1\u001b[0m\" \u001b[32m200 OK\u001b[0m\n^C\n\u001b[32mINFO\u001b[0m:     Shutting down\n\u001b[32mINFO\u001b[0m:     Waiting for application shutdown.\n\u001b[32m\n+-----------------------------------------------------------------------------+\n| ADK Web Server shutting down...                                             |\n+-----------------------------------------------------------------------------+\n\u001b[0m\n\u001b[32mINFO\u001b[0m:     Application shutdown complete.\n\u001b[32mINFO\u001b[0m:     Finished server process [\u001b[36m174\u001b[0m]\n\nAborted!\n","output_type":"stream"}],"execution_count":130}]}
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "3b3e0a12",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:24:38.677782Z",
+     "iopub.status.busy": "2025-11-23T23:24:38.677469Z",
+     "iopub.status.idle": "2025-11-23T23:24:38.858437Z",
+     "shell.execute_reply": "2025-11-23T23:24:38.857382Z"
+    },
+    "papermill": {
+     "duration": 0.189785,
+     "end_time": "2025-11-23T23:24:38.860174",
+     "exception": false,
+     "start_time": "2025-11-23T23:24:38.670389",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Gemini API key setup complete.\n"
+     ]
+    }
+   ],
+   "source": [
+    "import os\n",
+    "from kaggle_secrets import UserSecretsClient\n",
+    "\n",
+    "try:\n",
+    "    GOOGLE_API_KEY = UserSecretsClient().get_secret(\"GOOGLE_API_KEY\")\n",
+    "    os.environ[\"GOOGLE_API_KEY\"] = GOOGLE_API_KEY\n",
+    "    print(\"✅ Gemini API key setup complete.\")\n",
+    "except Exception as e:\n",
+    "    print(\n",
+    "        f\"🔑 Authentication Error: Please make sure you have added 'GOOGLE_API_KEY' to your Kaggle secrets. Details: {e}\"\n",
+    "    )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "dcc33fb4",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:24:38.871537Z",
+     "iopub.status.busy": "2025-11-23T23:24:38.871218Z",
+     "iopub.status.idle": "2025-11-23T23:25:33.508579Z",
+     "shell.execute_reply": "2025-11-23T23:25:33.507455Z"
+    },
+    "papermill": {
+     "duration": 54.649625,
+     "end_time": "2025-11-23T23:25:33.514780",
+     "exception": false,
+     "start_time": "2025-11-23T23:24:38.865155",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ ADK components imported successfully.\n"
+     ]
+    }
+   ],
+   "source": [
+    "from google.adk.agents import Agent\n",
+    "from google.adk.models.google_llm import Gemini\n",
+    "from google.adk.runners import InMemoryRunner\n",
+    "from google.adk.tools import google_search, AgentTool, ToolContext\n",
+    "from google.genai import types\n",
+    "from google.adk.agents import LlmAgent\n",
+    "from google.adk.sessions import InMemorySessionService\n",
+    "\n",
+    "print(\"✅ ADK components imported successfully.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "7e5ac063",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:33.526782Z",
+     "iopub.status.busy": "2025-11-23T23:25:33.525208Z",
+     "iopub.status.idle": "2025-11-23T23:25:33.533620Z",
+     "shell.execute_reply": "2025-11-23T23:25:33.532380Z"
+    },
+    "papermill": {
+     "duration": 0.015947,
+     "end_time": "2025-11-23T23:25:33.535300",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:33.519353",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ ADK components imported successfully.\n"
+     ]
+    }
+   ],
+   "source": [
+    "import uuid\n",
+    "from google.genai import types\n",
+    "\n",
+    "from google.adk.agents import LlmAgent\n",
+    "from google.adk.models.google_llm import Gemini\n",
+    "from google.adk.runners import Runner\n",
+    "from google.adk.sessions import InMemorySessionService\n",
+    "\n",
+    "from google.adk.tools.mcp_tool.mcp_toolset import McpToolset\n",
+    "from google.adk.tools.tool_context import ToolContext\n",
+    "from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams\n",
+    "from mcp import StdioServerParameters\n",
+    "\n",
+    "from google.adk.apps.app import App, ResumabilityConfig\n",
+    "from google.adk.tools.function_tool import FunctionTool\n",
+    "\n",
+    "print(\"✅ ADK components imported successfully.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "a82ec4e3",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:33.546639Z",
+     "iopub.status.busy": "2025-11-23T23:25:33.546310Z",
+     "iopub.status.idle": "2025-11-23T23:25:34.429743Z",
+     "shell.execute_reply": "2025-11-23T23:25:34.428367Z"
+    },
+    "papermill": {
+     "duration": 0.891362,
+     "end_time": "2025-11-23T23:25:34.431447",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:33.540085",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Helper functions defined.\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Define helper functions that will be reused throughout the notebook\n",
+    "\n",
+    "from IPython.core.display import display, HTML\n",
+    "from jupyter_server.serverapp import list_running_servers\n",
+    "\n",
+    "\n",
+    "# Gets the proxied URL in the Kaggle Notebooks environment\n",
+    "def get_adk_proxy_url():\n",
+    "    PROXY_HOST = \"https://kkb-production.jupyter-proxy.kaggle.net\"\n",
+    "    ADK_PORT = \"8000\"\n",
+    "\n",
+    "    servers = list(list_running_servers())\n",
+    "    if not servers:\n",
+    "        raise Exception(\"No running Jupyter servers found.\")\n",
+    "\n",
+    "    baseURL = servers[0][\"base_url\"]\n",
+    "\n",
+    "    try:\n",
+    "        path_parts = baseURL.split(\"/\")\n",
+    "        kernel = path_parts[2]\n",
+    "        token = path_parts[3]\n",
+    "    except IndexError:\n",
+    "        raise Exception(f\"Could not parse kernel/token from base URL: {baseURL}\")\n",
+    "\n",
+    "    url_prefix = f\"/k/{kernel}/{token}/proxy/proxy/{ADK_PORT}\"\n",
+    "    url = f\"{PROXY_HOST}{url_prefix}\"\n",
+    "\n",
+    "    styled_html = f\"\"\"\n",
+    "    <div style=\"padding: 15px; border: 2px solid #f0ad4e; border-radius: 8px; background-color: #fef9f0; margin: 20px 0;\">\n",
+    "        <div style=\"font-family: sans-serif; margin-bottom: 12px; color: #333; font-size: 1.1em;\">\n",
+    "            <strong>⚠️ IMPORTANT: Action Required</strong>\n",
+    "        </div>\n",
+    "        <div style=\"font-family: sans-serif; margin-bottom: 15px; color: #333; line-height: 1.5;\">\n",
+    "            The ADK web UI is <strong>not running yet</strong>. You must start it in the next cell.\n",
+    "            <ol style=\"margin-top: 10px; padding-left: 20px;\">\n",
+    "                <li style=\"margin-bottom: 5px;\"><strong>Run the next cell</strong> (the one with <code>!adk web ...</code>) to start the ADK web UI.</li>\n",
+    "                <li style=\"margin-bottom: 5px;\">Wait for that cell to show it is \"Running\" (it will not \"complete\").</li>\n",
+    "                <li>Once it's running, <strong>return to this button</strong> and click it to open the UI.</li>\n",
+    "            </ol>\n",
+    "            <em style=\"font-size: 0.9em; color: #555;\">(If you click the button before running the next cell, you will get a 500 error.)</em>\n",
+    "        </div>\n",
+    "        <a href='{url}' target='_blank' style=\"\n",
+    "            display: inline-block; background-color: #1a73e8; color: white; padding: 10px 20px;\n",
+    "            text-decoration: none; border-radius: 25px; font-family: sans-serif; font-weight: 500;\n",
+    "            box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: all 0.2s ease;\">\n",
+    "            Open ADK Web UI (after running cell below) ↗\n",
+    "        </a>\n",
+    "    </div>\n",
+    "    \"\"\"\n",
+    "\n",
+    "    display(HTML(styled_html))\n",
+    "\n",
+    "    return url_prefix\n",
+    "\n",
+    "\n",
+    "print(\"✅ Helper functions defined.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "04ce02a4",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:34.442918Z",
+     "iopub.status.busy": "2025-11-23T23:25:34.442254Z",
+     "iopub.status.idle": "2025-11-23T23:25:34.447658Z",
+     "shell.execute_reply": "2025-11-23T23:25:34.446627Z"
+    },
+    "papermill": {
+     "duration": 0.013269,
+     "end_time": "2025-11-23T23:25:34.449680",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:34.436411",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "retry_config=types.HttpRetryOptions(\n",
+    "    attempts=5,  # Maximum retry attempts\n",
+    "    exp_base=7,  # Delay multiplier\n",
+    "    initial_delay=1, # Initial delay before first retry (in seconds)\n",
+    "    http_status_codes=[429, 500, 503, 504] # Retry on these HTTP errors\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "3199dd81",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:34.460964Z",
+     "iopub.status.busy": "2025-11-23T23:25:34.460587Z",
+     "iopub.status.idle": "2025-11-23T23:25:34.467093Z",
+     "shell.execute_reply": "2025-11-23T23:25:34.466027Z"
+    },
+    "papermill": {
+     "duration": 0.013984,
+     "end_time": "2025-11-23T23:25:34.468560",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:34.454576",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Root Agent defined.\n"
+     ]
+    }
+   ],
+   "source": [
+    "iMedic = Agent(\n",
+    "    name=\"iMedic\",\n",
+    "    model=Gemini(\n",
+    "        model=\"gemini-2.5-flash-lite\",\n",
+    "        retry_options=retry_config\n",
+    "    ),\n",
+    "    description=\"A simple agent that can answer general questions.\",\n",
+    "    instruction=\"You are a helpful assistant. Use Google Search for current info or if unsure.\",\n",
+    "    tools=[google_search],\n",
+    ")\n",
+    "\n",
+    "print(\"✅ Root Agent defined.\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "17d806cd",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:34.480477Z",
+     "iopub.status.busy": "2025-11-23T23:25:34.480107Z",
+     "iopub.status.idle": "2025-11-23T23:25:34.490411Z",
+     "shell.execute_reply": "2025-11-23T23:25:34.489188Z"
+    },
+    "papermill": {
+     "duration": 0.018689,
+     "end_time": "2025-11-23T23:25:34.492115",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:34.473426",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "sucessfull\n",
+      "{'status': 'success', 'message': 'Appointment booked successfully!', 'appointment': {'patient_name': 'John Doe', 'doctor_name': 'Dr. Rahim', 'date': '2025-01-10', 'time': '14:30', 'symptoms': 'Headache'}}\n"
+     ]
+    }
+   ],
+   "source": [
+    "from datetime import datetime\n",
+    "\n",
+    "# Simple in-memory database (You can replace this with a real DB)\n",
+    "appointments = []\n",
+    "\n",
+    "def book_doctor_appointment(patient_name: str,\n",
+    "                            doctor_name: str,\n",
+    "                            date: str,\n",
+    "                            time: str,\n",
+    "                            symptoms: str = \"\") -> dict:\n",
+    "    \"\"\"\n",
+    "    Book a doctor appointment with validation.\n",
+    "    \n",
+    "    Args:\n",
+    "        patient_name (str): Name of the patient.\n",
+    "        doctor_name (str): Name of the doctor.\n",
+    "        date (str): Appointment date in YYYY-MM-DD format.\n",
+    "        time (str): Appointment time in HH:MM (24hr) format.\n",
+    "        symptoms (str): Optional - patient's symptoms.\n",
+    "\n",
+    "    Returns:\n",
+    "        dict: Confirmation or error message.\n",
+    "    \"\"\"\n",
+    "\n",
+    "    # Validate date\n",
+    "    try:\n",
+    "        appointment_date = datetime.strptime(date, \"%Y-%m-%d\").date()\n",
+    "    except ValueError:\n",
+    "        return {\"status\": \"error\", \"message\": \"Invalid date format. Use YYYY-MM-DD\"}\n",
+    "\n",
+    "    # Validate time\n",
+    "    try:\n",
+    "        appointment_time = datetime.strptime(time, \"%H:%M\").time()\n",
+    "    except ValueError:\n",
+    "        return {\"status\": \"error\", \"message\": \"Invalid time format. Use HH:MM (24hr)\"}\n",
+    "\n",
+    "    # Check if time slot is already booked\n",
+    "    for appt in appointments:\n",
+    "        if (appt[\"doctor_name\"].lower() == doctor_name.lower() and\n",
+    "            appt[\"date\"] == date and\n",
+    "            appt[\"time\"] == time):\n",
+    "            return {\n",
+    "                \"status\": \"error\",\n",
+    "                \"message\": f\"Doctor {doctor_name} is already booked at {time} on {date}.\"\n",
+    "            }\n",
+    "\n",
+    "    # Save appointment\n",
+    "    appointment = {\n",
+    "        \"patient_name\": patient_name,\n",
+    "        \"doctor_name\": doctor_name,\n",
+    "        \"date\": date,\n",
+    "        \"time\": time,\n",
+    "        \"symptoms\": symptoms\n",
+    "    }\n",
+    "\n",
+    "    appointments.append(appointment)\n",
+    "\n",
+    "    return {\n",
+    "        \"status\": \"success\",\n",
+    "        \"message\": \"Appointment booked successfully!\",\n",
+    "        \"appointment\": appointment\n",
+    "    }\n",
+    "\n",
+    "\n",
+    "# Example usage:\n",
+    "\n",
+    "print(\"sucessfull\")\n",
+    "print(book_doctor_appointment(\"John Doe\", \"Dr. Rahim\", \"2025-01-10\", \"14:30\", \"Headache\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "b43ecef5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:34.506338Z",
+     "iopub.status.busy": "2025-11-23T23:25:34.505979Z",
+     "iopub.status.idle": "2025-11-23T23:25:34.512967Z",
+     "shell.execute_reply": "2025-11-23T23:25:34.511496Z"
+    },
+    "papermill": {
+     "duration": 0.017438,
+     "end_time": "2025-11-23T23:25:34.515030",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:34.497592",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Doctor booking agent created with custom function tools\n",
+      "🔧 Available tools:\n"
+     ]
+    }
+   ],
+   "source": [
+    "# booking agent with custom function tools\n",
+    "booking_agent = LlmAgent(\n",
+    "    name=\"booking_agent\",\n",
+    "    model=Gemini(model=\"gemini-2.5-flash-lite\", retry_options=retry_config),\n",
+    "    instruction=\"\"\"You are a smart booking agent assistant.\n",
+    "\n",
+    "    For currency conversion requests:\n",
+    "    1. Use `book_doctor_appointment()` for booking\n",
+    "    3. Check the \"status\" field in each tool's response for errors\n",
+    "    4.If any tool returns status \"error\", explain the issue to the user clearly.\n",
+    "    5. give the result json formet\n",
+    "    6. after booking the appoinment give it json formet\n",
+    "    \"\"\",\n",
+    "    tools=[book_doctor_appointment],\n",
+    ")\n",
+    "\n",
+    "print(\"✅ Doctor booking agent created with custom function tools\")\n",
+    "print(\"🔧 Available tools:\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "d0535b4a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:34.526830Z",
+     "iopub.status.busy": "2025-11-23T23:25:34.526484Z",
+     "iopub.status.idle": "2025-11-23T23:25:34.533274Z",
+     "shell.execute_reply": "2025-11-23T23:25:34.532179Z"
+    },
+    "papermill": {
+     "duration": 0.014839,
+     "end_time": "2025-11-23T23:25:34.535043",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:34.520204",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Runner created.\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Test the booking agent\n",
+    "runner = InMemoryRunner(agent=booking_agent)\n",
+    "print(\"✅ Runner created.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "69fa0cf2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:34.546982Z",
+     "iopub.status.busy": "2025-11-23T23:25:34.546620Z",
+     "iopub.status.idle": "2025-11-23T23:25:34.550715Z",
+     "shell.execute_reply": "2025-11-23T23:25:34.549952Z"
+    },
+    "papermill": {
+     "duration": 0.012205,
+     "end_time": "2025-11-23T23:25:34.552251",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:34.540046",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "#response = await runner.run_debug(\" book a doctor\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "d5bf4f6a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:34.563897Z",
+     "iopub.status.busy": "2025-11-23T23:25:34.563543Z",
+     "iopub.status.idle": "2025-11-23T23:25:34.567994Z",
+     "shell.execute_reply": "2025-11-23T23:25:34.566995Z"
+    },
+    "papermill": {
+     "duration": 0.012619,
+     "end_time": "2025-11-23T23:25:34.569891",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:34.557272",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "#response = await runner.run_debug(\"How to add this info\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "abf1bb9e",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:34.581423Z",
+     "iopub.status.busy": "2025-11-23T23:25:34.581132Z",
+     "iopub.status.idle": "2025-11-23T23:25:35.869446Z",
+     "shell.execute_reply": "2025-11-23T23:25:35.868178Z"
+    },
+    "papermill": {
+     "duration": 1.296543,
+     "end_time": "2025-11-23T23:25:35.871548",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:34.575005",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      " ### Created new session: debug_session_id\n",
+      "\n",
+      "User > Kaykubad Dr. saynoor 2025/10/24 9.00AM skinissues\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "WARNING:google_genai.types:Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = await runner.run_debug(\"Kaykubad Dr. saynoor 2025/10/24 9.00AM skinissues\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "43ea5c56",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:35.883708Z",
+     "iopub.status.busy": "2025-11-23T23:25:35.883419Z",
+     "iopub.status.idle": "2025-11-23T23:25:35.892640Z",
+     "shell.execute_reply": "2025-11-23T23:25:35.891726Z"
+    },
+    "papermill": {
+     "duration": 0.017529,
+     "end_time": "2025-11-23T23:25:35.894365",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:35.876836",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import uuid\n",
+    "from datetime import datetime\n",
+    "\n",
+    "# Fake medicine inventory (replace with database in real app)\n",
+    "medicine_inventory = {\n",
+    "    \"Paracetamol 500mg\": {\"price\": 5.0, \"stock\": 50},\n",
+    "    \"Aspirin 300mg\": {\"price\": 8.0, \"stock\": 20},\n",
+    "    \"Amoxicillin 250mg\": {\"price\": 15.0, \"stock\": 10},\n",
+    "    \"Cetirizine 10mg\": {\"price\": 3.0, \"stock\": 40},\n",
+    "}\n",
+    "\n",
+    "orders = []\n",
+    "\n",
+    "\n",
+    "def book_medicine_online(customer_name: str,\n",
+    "                         medicine_name: str,\n",
+    "                         quantity: int,\n",
+    "                         address: str,\n",
+    "                         phone: str):\n",
+    "    \"\"\"\n",
+    "    Book/order medicine online with stock validation and 5% service charge.\n",
+    "    \"\"\"\n",
+    "\n",
+    "    # Validate input\n",
+    "    if quantity <= 0:\n",
+    "        return {\"status\": \"error\", \"message\": \"Quantity must be greater than zero.\"}\n",
+    "\n",
+    "    if medicine_name not in medicine_inventory:\n",
+    "        return {\"status\": \"error\", \"message\": f\"{medicine_name} not found in inventory.\"}\n",
+    "\n",
+    "    med = medicine_inventory[medicine_name]\n",
+    "\n",
+    "    # Stock check\n",
+    "    if quantity > med[\"stock\"]:\n",
+    "        return {\n",
+    "            \"status\": \"error\",\n",
+    "            \"message\": f\"Only {med['stock']} units of {medicine_name} available.\"\n",
+    "        }\n",
+    "\n",
+    "    # Base price\n",
+    "    base_price = quantity * med[\"price\"]\n",
+    "\n",
+    "    # Service charge 5%\n",
+    "    service_charge = base_price * 0.05\n",
+    "\n",
+    "    # Final total\n",
+    "    total_price = base_price + service_charge\n",
+    "\n",
+    "    # Update stock\n",
+    "    medicine_inventory[medicine_name][\"stock\"] -= quantity\n",
+    "\n",
+    "    # Order data\n",
+    "    order = {\n",
+    "        \"order_id\": str(uuid.uuid4()),\n",
+    "        \"customer_name\": customer_name,\n",
+    "        \"medicine_name\": medicine_name,\n",
+    "        \"quantity\": quantity,\n",
+    "        \"base_price\": base_price,\n",
+    "        \"service_charge_5_percent\": service_charge,\n",
+    "        \"total_price\": total_price,\n",
+    "        \"address\": address,\n",
+    "        \"phone\": phone,\n",
+    "        \"order_time\": datetime.now().isoformat()\n",
+    "    }\n",
+    "\n",
+    "    orders.append(order)\n",
+    "\n",
+    "    return {\n",
+    "        \"status\": \"success\",\n",
+    "        \"message\": \"Medicine ordered successfully!\",\n",
+    "        \"order\": order\n",
+    "    }\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "1e0617e4",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:35.906453Z",
+     "iopub.status.busy": "2025-11-23T23:25:35.906077Z",
+     "iopub.status.idle": "2025-11-23T23:25:35.912576Z",
+     "shell.execute_reply": "2025-11-23T23:25:35.911399Z"
+    },
+    "papermill": {
+     "duration": 0.014284,
+     "end_time": "2025-11-23T23:25:35.914272",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:35.899988",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'status': 'success', 'message': 'Medicine ordered successfully!', 'order': {'order_id': '38305906-b49e-4f58-828c-e56d90d59386', 'customer_name': 'John Doe', 'medicine_name': 'Paracetamol 500mg', 'quantity': 3, 'base_price': 15.0, 'service_charge_5_percent': 0.75, 'total_price': 15.75, 'address': 'Dhaka, Bangladesh', 'phone': '017xxxxxxxx', 'order_time': '2025-11-23T23:25:35.907578'}}\n"
+     ]
+    }
+   ],
+   "source": [
+    "# ---------- TEST ----------\n",
+    "print(book_medicine_online(\n",
+    "    \"John Doe\",\n",
+    "    \"Paracetamol 500mg\",\n",
+    "    3,\n",
+    "    \"Dhaka, Bangladesh\",\n",
+    "    \"017xxxxxxxx\"\n",
+    "))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "89b89841",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:35.926001Z",
+     "iopub.status.busy": "2025-11-23T23:25:35.925659Z",
+     "iopub.status.idle": "2025-11-23T23:25:35.933451Z",
+     "shell.execute_reply": "2025-11-23T23:25:35.932178Z"
+    },
+    "papermill": {
+     "duration": 0.015693,
+     "end_time": "2025-11-23T23:25:35.935086",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:35.919393",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Runner created.\n"
+     ]
+    }
+   ],
+   "source": [
+    "# booking agent with custom function tools\n",
+    "medicbooking_agent = LlmAgent(\n",
+    "    name=\"medicbooking_agent\",\n",
+    "    model=Gemini(model=\"gemini-2.5-flash-lite\", retry_options=retry_config),\n",
+    "    instruction=\"\"\"You are a smart booking agent assistant.\n",
+    "\n",
+    "    For medicine order conversion requests:\n",
+    "    1. Use `book_medicine_online()` for booking\n",
+    "    3. Check the \"status\" field in each tool's response for errors\n",
+    "    4.If any tool returns status \"error\", explain the issue to the user clearly.\n",
+    "    5. give the result json formet\n",
+    "    6. ask everything and accept the data\n",
+    "    6. after confirm the order give it json formet with its service charge result and suceessful message.\n",
+    "    \"\"\",\n",
+    "    tools=[book_medicine_online],\n",
+    ")\n",
+    "runner = InMemoryRunner(agent=medicbooking_agent)\n",
+    "print(\"✅ Runner created.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "2eddd5b7",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:35.947008Z",
+     "iopub.status.busy": "2025-11-23T23:25:35.946637Z",
+     "iopub.status.idle": "2025-11-23T23:25:36.534253Z",
+     "shell.execute_reply": "2025-11-23T23:25:36.532557Z"
+    },
+    "papermill": {
+     "duration": 0.59584,
+     "end_time": "2025-11-23T23:25:36.536177",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:35.940337",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      " ### Created new session: debug_session_id\n",
+      "\n",
+      "User > how to order medicine\n",
+      "medicbooking_agent > I can help you order medicine online. Please provide me with the following details:\n",
+      "- Your name\n",
+      "- Name of the medicine\n",
+      "- Quantity\n",
+      "- Your address\n",
+      "- Your phone number\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = await runner.run_debug(\"how to order medicine\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "e1ced994",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:36.549500Z",
+     "iopub.status.busy": "2025-11-23T23:25:36.548686Z",
+     "iopub.status.idle": "2025-11-23T23:25:36.858985Z",
+     "shell.execute_reply": "2025-11-23T23:25:36.857746Z"
+    },
+    "papermill": {
+     "duration": 0.318693,
+     "end_time": "2025-11-23T23:25:36.860676",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:36.541983",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      " ### Continue session: debug_session_id\n",
+      "\n",
+      "User > turag Paracetamol 500mg 5pcs Dhaka 019888888\n",
+      "medicbooking_agent > Could you please provide your name?\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = await runner.run_debug(\"turag Paracetamol 500mg 5pcs Dhaka 019888888\")\n",
+    "                                            "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "id": "0e4ee938",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:36.880482Z",
+     "iopub.status.busy": "2025-11-23T23:25:36.880086Z",
+     "iopub.status.idle": "2025-11-23T23:25:38.185503Z",
+     "shell.execute_reply": "2025-11-23T23:25:38.184131Z"
+    },
+    "papermill": {
+     "duration": 1.314071,
+     "end_time": "2025-11-23T23:25:38.187376",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:36.873305",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      " ### Continue session: debug_session_id\n",
+      "\n",
+      "User > confirm this\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "WARNING:google_genai.types:Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "medicbooking_agent > Yes, your order has been confirmed.\n",
+      "\n",
+      "Here is the summary of your order:\n",
+      "- Order ID: 4f729b5b-6b93-4304-8ebd-b47196877870\n",
+      "- Customer Name: turag\n",
+      "- Medicine Name: Paracetamol 500mg\n",
+      "- Quantity: 5\n",
+      "- Address: Dhaka\n",
+      "- Phone: 019888888\n",
+      "- Base Price: 25\n",
+      "- Service Charge (5%): 1.25\n",
+      "- Total Price: 26.25\n",
+      "\n",
+      "Your order has been successfully placed. Thank you!\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = await runner.run_debug('confirm this')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "id": "b0d08250",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:38.200916Z",
+     "iopub.status.busy": "2025-11-23T23:25:38.199671Z",
+     "iopub.status.idle": "2025-11-23T23:25:38.205879Z",
+     "shell.execute_reply": "2025-11-23T23:25:38.205028Z"
+    },
+    "papermill": {
+     "duration": 0.01455,
+     "end_time": "2025-11-23T23:25:38.207449",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:38.192899",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "medical_booking_order_agent = LlmAgent(\n",
+    "    name=\"medical_booking_order_agent\",\n",
+    "    model=Gemini(model=\"gemini-2.5-flash-lite\", retry_options=retry_config),\n",
+    "    # Updated instruction\n",
+    "    instruction=\"\"\"You are a smart doctor booking and medicine order assistant. You must strictly follow these steps and use the available tools.\n",
+    "\n",
+    "  For any doctor booking or medicine order conversion request:\n",
+    "\n",
+    "   1. for doctor booking: Use the book_doctor_appointment() tool to book the doctor for patient.\n",
+    "   2. for medicine order : Use the book_medicine_online() tool to confirm the order.\n",
+    "   3. Error Check: After each tool call, you must check the \"status\" field in the response. If the status is \"error\", you must stop and clearly explain the issue to the user.\n",
+    "   4. Provide Detailed Breakdown: In your summary, you must:\n",
+    "       * State the final result in json formet.\n",
+    "       * Explain how the result was how it work, including:\n",
+    "           * The fee percentage and the fee amount \n",
+    "    \"\"\",\n",
+    "    tools=[book_doctor_appointment,\n",
+    "           book_medicine_online,\n",
+    "        AgentTool(agent=iMedic),  # Using another agent as a tool!\n",
+    "    ],\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "id": "06448ea1",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:38.219681Z",
+     "iopub.status.busy": "2025-11-23T23:25:38.219386Z",
+     "iopub.status.idle": "2025-11-23T23:25:38.226565Z",
+     "shell.execute_reply": "2025-11-23T23:25:38.225373Z"
+    },
+    "papermill": {
+     "duration": 0.015651,
+     "end_time": "2025-11-23T23:25:38.228580",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:38.212929",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Runner created.\n"
+     ]
+    }
+   ],
+   "source": [
+    "runner = InMemoryRunner(agent=medical_booking_order_agent)\n",
+    "print(\"✅ Runner created.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "id": "4ac2489c",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:38.241360Z",
+     "iopub.status.busy": "2025-11-23T23:25:38.240893Z",
+     "iopub.status.idle": "2025-11-23T23:25:38.913480Z",
+     "shell.execute_reply": "2025-11-23T23:25:38.912409Z"
+    },
+    "papermill": {
+     "duration": 0.681227,
+     "end_time": "2025-11-23T23:25:38.915314",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:38.234087",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      " ### Created new session: debug_session_id\n",
+      "\n",
+      "User > what is your agent name?\n",
+      "medical_booking_order_agent > My internal name is \"medical_booking_order_agent\".\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = await runner.run_debug(\"what is your agent name?\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "id": "683033ae",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:38.929366Z",
+     "iopub.status.busy": "2025-11-23T23:25:38.929053Z",
+     "iopub.status.idle": "2025-11-23T23:25:38.933702Z",
+     "shell.execute_reply": "2025-11-23T23:25:38.932593Z"
+    },
+    "papermill": {
+     "duration": 0.014317,
+     "end_time": "2025-11-23T23:25:38.935582",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:38.921265",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "#!adk create medical_booking_order_agent --model gemini-2.5-flash-lite --api_key $GOOGLE_API_KEY"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "ea7c50c3",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:38.948212Z",
+     "iopub.status.busy": "2025-11-23T23:25:38.947875Z",
+     "iopub.status.idle": "2025-11-23T23:25:38.952431Z",
+     "shell.execute_reply": "2025-11-23T23:25:38.951302Z"
+    },
+    "papermill": {
+     "duration": 0.012976,
+     "end_time": "2025-11-23T23:25:38.954112",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:38.941136",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "#url_prefix = get_adk_proxy_url()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "e25c0496",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2025-11-23T23:25:38.966874Z",
+     "iopub.status.busy": "2025-11-23T23:25:38.966544Z",
+     "iopub.status.idle": "2025-11-23T23:25:38.970605Z",
+     "shell.execute_reply": "2025-11-23T23:25:38.969660Z"
+    },
+    "papermill": {
+     "duration": 0.012649,
+     "end_time": "2025-11-23T23:25:38.972567",
+     "exception": false,
+     "start_time": "2025-11-23T23:25:38.959918",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "#!adk web --url_prefix {url_prefix}"
+   ]
+  }
+ ],
+ "metadata": {
+  "kaggle": {
+   "accelerator": "none",
+   "dataSources": [],
+   "dockerImageVersionId": 31192,
+   "isGpuEnabled": false,
+   "isInternetEnabled": true,
+   "language": "python",
+   "sourceType": "notebook"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.13"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 68.437433,
+   "end_time": "2025-11-23T23:25:41.836430",
+   "environment_variables": {},
+   "exception": null,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2025-11-23T23:24:33.398997",
+   "version": "2.6.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
