@@ -1,21 +1,58 @@
 {
  "cells": [
   {
+   "cell_type": "markdown",
+   "id": "84a58013",
+   "metadata": {
+    "papermill": {
+     "duration": 0.008902,
+     "end_time": "2025-11-24T20:21:06.603681",
+     "exception": false,
+     "start_time": "2025-11-24T20:21:06.594779",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 1. Description of iMedic Agent (Google ADK)\n",
+    "iMedic Agent is an advanced AI-powered healthcare assistant built using Google AI Agent Development Kit (ADK). It is designed to streamline and automate key patient-care service workflows with high accuracy, fast responses, and seamless integration with medical systems.\n",
+    "\n",
+    "The agent intelligently supports multiple healthcare operations, making it a unified digital companion for both patients and clinics."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8f0aafb2",
+   "metadata": {
+    "papermill": {
+     "duration": 0.007378,
+     "end_time": "2025-11-24T20:21:06.620018",
+     "exception": false,
+     "start_time": "2025-11-24T20:21:06.612640",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 2. Setup Google API key"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 1,
-   "id": "34c789dc",
+   "id": "99ffbbcc",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:45:04.407952Z",
-     "iopub.status.busy": "2025-11-24T19:45:04.407601Z",
-     "iopub.status.idle": "2025-11-24T19:45:04.602950Z",
-     "shell.execute_reply": "2025-11-24T19:45:04.602171Z"
+     "iopub.execute_input": "2025-11-24T20:21:06.637249Z",
+     "iopub.status.busy": "2025-11-24T20:21:06.636457Z",
+     "iopub.status.idle": "2025-11-24T20:21:06.908312Z",
+     "shell.execute_reply": "2025-11-24T20:21:06.907196Z"
     },
     "papermill": {
-     "duration": 0.205957,
-     "end_time": "2025-11-24T19:45:04.604239",
+     "duration": 0.28243,
+     "end_time": "2025-11-24T20:21:06.910105",
      "exception": false,
-     "start_time": "2025-11-24T19:45:04.398282",
+     "start_time": "2025-11-24T20:21:06.627675",
      "status": "completed"
     },
     "tags": []
@@ -44,21 +81,39 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "909920c9",
+   "metadata": {
+    "papermill": {
+     "duration": 0.007371,
+     "end_time": "2025-11-24T20:21:06.925052",
+     "exception": false,
+     "start_time": "2025-11-24T20:21:06.917681",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 3. Build your agent with ADK\n",
+    "Set up Environment & Install ADK"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 2,
-   "id": "60157c01",
+   "id": "23d29fcb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:45:04.618828Z",
-     "iopub.status.busy": "2025-11-24T19:45:04.618588Z",
-     "iopub.status.idle": "2025-11-24T19:46:06.299753Z",
-     "shell.execute_reply": "2025-11-24T19:46:06.298672Z"
+     "iopub.execute_input": "2025-11-24T20:21:06.942321Z",
+     "iopub.status.busy": "2025-11-24T20:21:06.941874Z",
+     "iopub.status.idle": "2025-11-24T20:21:59.919397Z",
+     "shell.execute_reply": "2025-11-24T20:21:59.918261Z"
     },
     "papermill": {
-     "duration": 61.695521,
-     "end_time": "2025-11-24T19:46:06.306414",
+     "duration": 52.994965,
+     "end_time": "2025-11-24T20:21:59.927980",
      "exception": false,
-     "start_time": "2025-11-24T19:45:04.610893",
+     "start_time": "2025-11-24T20:21:06.933015",
      "status": "completed"
     },
     "tags": []
@@ -87,19 +142,19 @@
   {
    "cell_type": "code",
    "execution_count": 3,
-   "id": "98a6462e",
+   "id": "568f5ceb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:06.321845Z",
-     "iopub.status.busy": "2025-11-24T19:46:06.320814Z",
-     "iopub.status.idle": "2025-11-24T19:46:06.327559Z",
-     "shell.execute_reply": "2025-11-24T19:46:06.326620Z"
+     "iopub.execute_input": "2025-11-24T20:21:59.946592Z",
+     "iopub.status.busy": "2025-11-24T20:21:59.945197Z",
+     "iopub.status.idle": "2025-11-24T20:21:59.953411Z",
+     "shell.execute_reply": "2025-11-24T20:21:59.952448Z"
     },
     "papermill": {
-     "duration": 0.016327,
-     "end_time": "2025-11-24T19:46:06.328942",
+     "duration": 0.018578,
+     "end_time": "2025-11-24T20:21:59.954870",
      "exception": false,
-     "start_time": "2025-11-24T19:46:06.312615",
+     "start_time": "2025-11-24T20:21:59.936292",
      "status": "completed"
     },
     "tags": []
@@ -136,19 +191,19 @@
   {
    "cell_type": "code",
    "execution_count": 4,
-   "id": "c42ae2ec",
+   "id": "1d7c0fcf",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:06.344506Z",
-     "iopub.status.busy": "2025-11-24T19:46:06.343674Z",
-     "iopub.status.idle": "2025-11-24T19:46:07.375070Z",
-     "shell.execute_reply": "2025-11-24T19:46:07.373883Z"
+     "iopub.execute_input": "2025-11-24T20:21:59.971813Z",
+     "iopub.status.busy": "2025-11-24T20:21:59.971480Z",
+     "iopub.status.idle": "2025-11-24T20:22:00.764038Z",
+     "shell.execute_reply": "2025-11-24T20:22:00.762943Z"
     },
     "papermill": {
-     "duration": 1.041348,
-     "end_time": "2025-11-24T19:46:07.376879",
+     "duration": 0.803222,
+     "end_time": "2025-11-24T20:22:00.765801",
      "exception": false,
-     "start_time": "2025-11-24T19:46:06.335531",
+     "start_time": "2025-11-24T20:21:59.962579",
      "status": "completed"
     },
     "tags": []
@@ -224,19 +279,19 @@
   {
    "cell_type": "code",
    "execution_count": 5,
-   "id": "593dcd3e",
+   "id": "bd634244",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:07.400878Z",
-     "iopub.status.busy": "2025-11-24T19:46:07.400076Z",
-     "iopub.status.idle": "2025-11-24T19:46:07.407508Z",
-     "shell.execute_reply": "2025-11-24T19:46:07.406460Z"
+     "iopub.execute_input": "2025-11-24T20:22:00.782862Z",
+     "iopub.status.busy": "2025-11-24T20:22:00.782229Z",
+     "iopub.status.idle": "2025-11-24T20:22:00.787735Z",
+     "shell.execute_reply": "2025-11-24T20:22:00.786722Z"
     },
     "papermill": {
-     "duration": 0.022492,
-     "end_time": "2025-11-24T19:46:07.409803",
+     "duration": 0.015688,
+     "end_time": "2025-11-24T20:22:00.789339",
      "exception": false,
-     "start_time": "2025-11-24T19:46:07.387311",
+     "start_time": "2025-11-24T20:22:00.773651",
      "status": "completed"
     },
     "tags": []
@@ -252,21 +307,44 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "9d27d9a1",
+   "metadata": {
+    "papermill": {
+     "duration": 0.007573,
+     "end_time": "2025-11-24T20:22:00.804737",
+     "exception": false,
+     "start_time": "2025-11-24T20:22:00.797164",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 4. Medical Information Assistance \n",
+    "\n",
+    "1. Basic health-related queries (non-diagnostic)\n",
+    "\n",
+    "2. Medication guidelines and general safety information\n",
+    "\n",
+    "3. It serves as a first layer of intelligent support for patients seeking quick medical information."
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 6,
-   "id": "9064b738",
+   "id": "575f4137",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:07.424620Z",
-     "iopub.status.busy": "2025-11-24T19:46:07.424370Z",
-     "iopub.status.idle": "2025-11-24T19:46:07.430646Z",
-     "shell.execute_reply": "2025-11-24T19:46:07.428789Z"
+     "iopub.execute_input": "2025-11-24T20:22:00.821462Z",
+     "iopub.status.busy": "2025-11-24T20:22:00.821118Z",
+     "iopub.status.idle": "2025-11-24T20:22:00.827250Z",
+     "shell.execute_reply": "2025-11-24T20:22:00.826224Z"
     },
     "papermill": {
-     "duration": 0.015159,
-     "end_time": "2025-11-24T19:46:07.432642",
+     "duration": 0.016448,
+     "end_time": "2025-11-24T20:22:00.828752",
      "exception": false,
-     "start_time": "2025-11-24T19:46:07.417483",
+     "start_time": "2025-11-24T20:22:00.812304",
      "status": "completed"
     },
     "tags": []
@@ -296,21 +374,38 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "a4545d20",
+   "metadata": {
+    "papermill": {
+     "duration": 0.00757,
+     "end_time": "2025-11-24T20:22:00.843962",
+     "exception": false,
+     "start_time": "2025-11-24T20:22:00.836392",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 5. Custom Tools for ADK"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 7,
-   "id": "12c41d99",
+   "id": "f97fc3fd",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:07.450293Z",
-     "iopub.status.busy": "2025-11-24T19:46:07.449589Z",
-     "iopub.status.idle": "2025-11-24T19:46:07.457813Z",
-     "shell.execute_reply": "2025-11-24T19:46:07.456923Z"
+     "iopub.execute_input": "2025-11-24T20:22:00.861037Z",
+     "iopub.status.busy": "2025-11-24T20:22:00.860605Z",
+     "iopub.status.idle": "2025-11-24T20:22:00.871507Z",
+     "shell.execute_reply": "2025-11-24T20:22:00.870386Z"
     },
     "papermill": {
-     "duration": 0.018236,
-     "end_time": "2025-11-24T19:46:07.459353",
+     "duration": 0.021642,
+     "end_time": "2025-11-24T20:22:00.873133",
      "exception": false,
-     "start_time": "2025-11-24T19:46:07.441117",
+     "start_time": "2025-11-24T20:22:00.851491",
      "status": "completed"
     },
     "tags": []
@@ -397,21 +492,51 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "9bf9df6a",
+   "metadata": {
+    "papermill": {
+     "duration": 0.007659,
+     "end_time": "2025-11-24T20:22:00.890215",
+     "exception": false,
+     "start_time": "2025-11-24T20:22:00.882556",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 6. Doctor Appointment Booking\n",
+    "The agent can schedule doctor appointments in real time by:\n",
+    "\n",
+    "Checking doctor availability\n",
+    "\n",
+    "Suggesting next available slots\n",
+    "\n",
+    "Confirming bookings\n",
+    "\n",
+    "Updating or canceling appointments\n",
+    "\n",
+    "Sending reminders or follow-ups\n",
+    "\n",
+    "It integrates easily with custom tools."
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 8,
-   "id": "79eea474",
+   "id": "82f4c3b3",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:07.474599Z",
-     "iopub.status.busy": "2025-11-24T19:46:07.474325Z",
-     "iopub.status.idle": "2025-11-24T19:46:07.481120Z",
-     "shell.execute_reply": "2025-11-24T19:46:07.479822Z"
+     "iopub.execute_input": "2025-11-24T20:22:00.907506Z",
+     "iopub.status.busy": "2025-11-24T20:22:00.907086Z",
+     "iopub.status.idle": "2025-11-24T20:22:00.913650Z",
+     "shell.execute_reply": "2025-11-24T20:22:00.912605Z"
     },
     "papermill": {
-     "duration": 0.015997,
-     "end_time": "2025-11-24T19:46:07.482845",
+     "duration": 0.017005,
+     "end_time": "2025-11-24T20:22:00.915106",
      "exception": false,
-     "start_time": "2025-11-24T19:46:07.466848",
+     "start_time": "2025-11-24T20:22:00.898101",
      "status": "completed"
     },
     "tags": []
@@ -450,19 +575,19 @@
   {
    "cell_type": "code",
    "execution_count": 9,
-   "id": "a3bdb29b",
+   "id": "af1e2b3b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:07.499569Z",
-     "iopub.status.busy": "2025-11-24T19:46:07.499272Z",
-     "iopub.status.idle": "2025-11-24T19:46:07.504627Z",
-     "shell.execute_reply": "2025-11-24T19:46:07.503689Z"
+     "iopub.execute_input": "2025-11-24T20:22:00.932365Z",
+     "iopub.status.busy": "2025-11-24T20:22:00.932053Z",
+     "iopub.status.idle": "2025-11-24T20:22:00.938702Z",
+     "shell.execute_reply": "2025-11-24T20:22:00.937499Z"
     },
     "papermill": {
-     "duration": 0.015242,
-     "end_time": "2025-11-24T19:46:07.506003",
+     "duration": 0.017312,
+     "end_time": "2025-11-24T20:22:00.940304",
      "exception": false,
-     "start_time": "2025-11-24T19:46:07.490761",
+     "start_time": "2025-11-24T20:22:00.922992",
      "status": "completed"
     },
     "tags": []
@@ -485,19 +610,19 @@
   {
    "cell_type": "code",
    "execution_count": 10,
-   "id": "56864e25",
+   "id": "8a0557b8",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:07.521403Z",
-     "iopub.status.busy": "2025-11-24T19:46:07.520983Z",
-     "iopub.status.idle": "2025-11-24T19:46:07.525893Z",
-     "shell.execute_reply": "2025-11-24T19:46:07.524788Z"
+     "iopub.execute_input": "2025-11-24T20:22:00.957577Z",
+     "iopub.status.busy": "2025-11-24T20:22:00.957205Z",
+     "iopub.status.idle": "2025-11-24T20:22:00.962086Z",
+     "shell.execute_reply": "2025-11-24T20:22:00.960831Z"
     },
     "papermill": {
-     "duration": 0.014669,
-     "end_time": "2025-11-24T19:46:07.527402",
+     "duration": 0.015662,
+     "end_time": "2025-11-24T20:22:00.963855",
      "exception": false,
-     "start_time": "2025-11-24T19:46:07.512733",
+     "start_time": "2025-11-24T20:22:00.948193",
      "status": "completed"
     },
     "tags": []
@@ -510,19 +635,19 @@
   {
    "cell_type": "code",
    "execution_count": 11,
-   "id": "cd07e438",
+   "id": "078a68c1",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:07.542983Z",
-     "iopub.status.busy": "2025-11-24T19:46:07.542718Z",
-     "iopub.status.idle": "2025-11-24T19:46:07.546841Z",
-     "shell.execute_reply": "2025-11-24T19:46:07.545856Z"
+     "iopub.execute_input": "2025-11-24T20:22:00.981045Z",
+     "iopub.status.busy": "2025-11-24T20:22:00.980734Z",
+     "iopub.status.idle": "2025-11-24T20:22:00.985257Z",
+     "shell.execute_reply": "2025-11-24T20:22:00.984313Z"
     },
     "papermill": {
-     "duration": 0.013758,
-     "end_time": "2025-11-24T19:46:07.548501",
+     "duration": 0.015015,
+     "end_time": "2025-11-24T20:22:00.986810",
      "exception": false,
-     "start_time": "2025-11-24T19:46:07.534743",
+     "start_time": "2025-11-24T20:22:00.971795",
      "status": "completed"
     },
     "tags": []
@@ -535,19 +660,19 @@
   {
    "cell_type": "code",
    "execution_count": 12,
-   "id": "fcafef27",
+   "id": "1eee780c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:07.563978Z",
-     "iopub.status.busy": "2025-11-24T19:46:07.563724Z",
-     "iopub.status.idle": "2025-11-24T19:46:09.780323Z",
-     "shell.execute_reply": "2025-11-24T19:46:09.779346Z"
+     "iopub.execute_input": "2025-11-24T20:22:01.004196Z",
+     "iopub.status.busy": "2025-11-24T20:22:01.003866Z",
+     "iopub.status.idle": "2025-11-24T20:22:02.678043Z",
+     "shell.execute_reply": "2025-11-24T20:22:02.676863Z"
     },
     "papermill": {
-     "duration": 2.226148,
-     "end_time": "2025-11-24T19:46:09.781601",
+     "duration": 1.685211,
+     "end_time": "2025-11-24T20:22:02.680003",
      "exception": false,
-     "start_time": "2025-11-24T19:46:07.555453",
+     "start_time": "2025-11-24T20:22:00.994792",
      "status": "completed"
     },
     "tags": []
@@ -569,26 +694,6 @@
      "text": [
       "WARNING:google_genai.types:Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.\n"
      ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "booking_agent > Yes, the appointment is confirmed with Dr. saynoor for Kaykubad on 2025-10-24 at 09:00 AM for skin issues.\n",
-      "```json\n",
-      "{\n",
-      "  \"appointment\": {\n",
-      "    \"date\": \"2025-10-24\",\n",
-      "    \"doctor_name\": \"Dr. saynoor\",\n",
-      "    \"patient_name\": \"Kaykubad\",\n",
-      "    \"symptoms\": \"skinissues\",\n",
-      "    \"time\": \"09:00\"\n",
-      "  },\n",
-      "  \"message\": \"Appointment booked successfully!\",\n",
-      "  \"status\": \"success\"\n",
-      "}\n",
-      "```\n"
-     ]
     }
    ],
    "source": [
@@ -598,19 +703,19 @@
   {
    "cell_type": "code",
    "execution_count": 13,
-   "id": "6dcbaef8",
+   "id": "4ff8d9fd",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:09.797789Z",
-     "iopub.status.busy": "2025-11-24T19:46:09.797492Z",
-     "iopub.status.idle": "2025-11-24T19:46:09.805913Z",
-     "shell.execute_reply": "2025-11-24T19:46:09.805197Z"
+     "iopub.execute_input": "2025-11-24T20:22:02.698193Z",
+     "iopub.status.busy": "2025-11-24T20:22:02.697836Z",
+     "iopub.status.idle": "2025-11-24T20:22:02.707626Z",
+     "shell.execute_reply": "2025-11-24T20:22:02.706484Z"
     },
     "papermill": {
-     "duration": 0.018735,
-     "end_time": "2025-11-24T19:46:09.807441",
+     "duration": 0.020738,
+     "end_time": "2025-11-24T20:22:02.709295",
      "exception": false,
-     "start_time": "2025-11-24T19:46:09.788706",
+     "start_time": "2025-11-24T20:22:02.688557",
      "status": "completed"
     },
     "tags": []
@@ -695,19 +800,19 @@
   {
    "cell_type": "code",
    "execution_count": 14,
-   "id": "3d18ce0b",
+   "id": "de9abb8c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:09.823485Z",
-     "iopub.status.busy": "2025-11-24T19:46:09.822907Z",
-     "iopub.status.idle": "2025-11-24T19:46:09.826967Z",
-     "shell.execute_reply": "2025-11-24T19:46:09.826206Z"
+     "iopub.execute_input": "2025-11-24T20:22:02.727201Z",
+     "iopub.status.busy": "2025-11-24T20:22:02.726854Z",
+     "iopub.status.idle": "2025-11-24T20:22:02.732188Z",
+     "shell.execute_reply": "2025-11-24T20:22:02.731131Z"
     },
     "papermill": {
-     "duration": 0.013984,
-     "end_time": "2025-11-24T19:46:09.828633",
+     "duration": 0.01623,
+     "end_time": "2025-11-24T20:22:02.733780",
      "exception": false,
-     "start_time": "2025-11-24T19:46:09.814649",
+     "start_time": "2025-11-24T20:22:02.717550",
      "status": "completed"
     },
     "tags": []
@@ -717,7 +822,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "{'status': 'success', 'message': 'Medicine ordered successfully!', 'order': {'order_id': 'cf5e13c8-23e0-44c5-aa25-c3de9749ef30', 'customer_name': 'John Doe', 'medicine_name': 'Paracetamol 500mg', 'quantity': 3, 'base_price': 15.0, 'service_charge_5_percent': 0.75, 'total_price': 15.75, 'address': 'Dhaka, Bangladesh', 'phone': '017xxxxxxxx', 'order_time': '2025-11-24T19:46:09.824437'}}\n"
+      "{'status': 'success', 'message': 'Medicine ordered successfully!', 'order': {'order_id': '9d86fd98-26f1-4e7e-a6a2-8ae300885d1e', 'customer_name': 'John Doe', 'medicine_name': 'Paracetamol 500mg', 'quantity': 3, 'base_price': 15.0, 'service_charge_5_percent': 0.75, 'total_price': 15.75, 'address': 'Dhaka, Bangladesh', 'phone': '017xxxxxxxx', 'order_time': '2025-11-24T20:22:02.728300'}}\n"
      ]
     }
    ],
@@ -733,21 +838,47 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "8f09c4fb",
+   "metadata": {
+    "papermill": {
+     "duration": 0.007839,
+     "end_time": "2025-11-24T20:22:02.749730",
+     "exception": false,
+     "start_time": "2025-11-24T20:22:02.741891",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 7. Online Medicine Order & Confirmation\n",
+    "Checking pharmacy inventory\n",
+    "\n",
+    "Processing user medicine lists\n",
+    "\n",
+    "Calculating total price with delivery/service charges\n",
+    "\n",
+    "Confirming and placing the order\n",
+    "\n",
+    "Tracking delivery status"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 15,
-   "id": "ae3d875f",
+   "id": "5c04a500",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:09.844300Z",
-     "iopub.status.busy": "2025-11-24T19:46:09.843760Z",
-     "iopub.status.idle": "2025-11-24T19:46:09.849665Z",
-     "shell.execute_reply": "2025-11-24T19:46:09.848629Z"
+     "iopub.execute_input": "2025-11-24T20:22:02.767493Z",
+     "iopub.status.busy": "2025-11-24T20:22:02.767145Z",
+     "iopub.status.idle": "2025-11-24T20:22:02.774174Z",
+     "shell.execute_reply": "2025-11-24T20:22:02.773060Z"
     },
     "papermill": {
-     "duration": 0.015812,
-     "end_time": "2025-11-24T19:46:09.851020",
+     "duration": 0.01825,
+     "end_time": "2025-11-24T20:22:02.775810",
      "exception": false,
-     "start_time": "2025-11-24T19:46:09.835208",
+     "start_time": "2025-11-24T20:22:02.757560",
      "status": "completed"
     },
     "tags": []
@@ -785,19 +916,19 @@
   {
    "cell_type": "code",
    "execution_count": 16,
-   "id": "089ca3bc",
+   "id": "5add78af",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:09.867625Z",
-     "iopub.status.busy": "2025-11-24T19:46:09.866703Z",
-     "iopub.status.idle": "2025-11-24T19:46:10.493614Z",
-     "shell.execute_reply": "2025-11-24T19:46:10.492577Z"
+     "iopub.execute_input": "2025-11-24T20:22:02.794055Z",
+     "iopub.status.busy": "2025-11-24T20:22:02.793722Z",
+     "iopub.status.idle": "2025-11-24T20:22:03.619611Z",
+     "shell.execute_reply": "2025-11-24T20:22:03.618467Z"
     },
     "papermill": {
-     "duration": 0.63671,
-     "end_time": "2025-11-24T19:46:10.495013",
+     "duration": 0.837068,
+     "end_time": "2025-11-24T20:22:03.621273",
      "exception": false,
-     "start_time": "2025-11-24T19:46:09.858303",
+     "start_time": "2025-11-24T20:22:02.784205",
      "status": "completed"
     },
     "tags": []
@@ -811,7 +942,7 @@
       " ### Created new session: debug_session_id\n",
       "\n",
       "User > how to order medicine\n",
-      "medicbooking_agent > How can I help you with your medicine order? Please provide me with the medicine name, quantity, your name, and delivery address.\n"
+      "medicbooking_agent > I can help you with that! What medicine would you like to order, what quantity do you need, what is your name, address, and phone number?\n"
      ]
     }
    ],
@@ -822,19 +953,19 @@
   {
    "cell_type": "code",
    "execution_count": 17,
-   "id": "85b55d4b",
+   "id": "146a411c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:10.510299Z",
-     "iopub.status.busy": "2025-11-24T19:46:10.509705Z",
-     "iopub.status.idle": "2025-11-24T19:46:10.823511Z",
-     "shell.execute_reply": "2025-11-24T19:46:10.822623Z"
+     "iopub.execute_input": "2025-11-24T20:22:03.640764Z",
+     "iopub.status.busy": "2025-11-24T20:22:03.639590Z",
+     "iopub.status.idle": "2025-11-24T20:22:04.387547Z",
+     "shell.execute_reply": "2025-11-24T20:22:04.386407Z"
     },
     "papermill": {
-     "duration": 0.32275,
-     "end_time": "2025-11-24T19:46:10.824924",
+     "duration": 0.758987,
+     "end_time": "2025-11-24T20:22:04.389181",
      "exception": false,
-     "start_time": "2025-11-24T19:46:10.502174",
+     "start_time": "2025-11-24T20:22:03.630194",
      "status": "completed"
     },
     "tags": []
@@ -848,7 +979,7 @@
       " ### Continue session: debug_session_id\n",
       "\n",
       "User > turag Paracetamol 500mg 5pcs Dhaka 019888888\n",
-      "medicbooking_agent > Could you please provide your name and confirm the delivery address?\n"
+      "medicbooking_agent > Could you please provide your full name?\n"
      ]
     }
    ],
@@ -860,19 +991,19 @@
   {
    "cell_type": "code",
    "execution_count": 18,
-   "id": "93ca1365",
+   "id": "cfa3afda",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:10.842411Z",
-     "iopub.status.busy": "2025-11-24T19:46:10.841666Z",
-     "iopub.status.idle": "2025-11-24T19:46:11.586957Z",
-     "shell.execute_reply": "2025-11-24T19:46:11.586214Z"
+     "iopub.execute_input": "2025-11-24T20:22:04.407841Z",
+     "iopub.status.busy": "2025-11-24T20:22:04.406944Z",
+     "iopub.status.idle": "2025-11-24T20:22:05.471731Z",
+     "shell.execute_reply": "2025-11-24T20:22:05.470823Z"
     },
     "papermill": {
-     "duration": 0.755263,
-     "end_time": "2025-11-24T19:46:11.588090",
+     "duration": 1.075756,
+     "end_time": "2025-11-24T20:22:05.473263",
      "exception": false,
-     "start_time": "2025-11-24T19:46:10.832827",
+     "start_time": "2025-11-24T20:22:04.397507",
      "status": "completed"
     },
     "tags": []
@@ -885,8 +1016,14 @@
       "\n",
       " ### Continue session: debug_session_id\n",
       "\n",
-      "User > confirm this\n",
-      "medicbooking_agent > I'm sorry, but I need a bit more information to proceed. Could you please provide your name and the full delivery address, including any relevant details like area or road name?\n"
+      "User > confirm this\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "WARNING:google_genai.types:Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.\n"
      ]
     }
    ],
@@ -895,21 +1032,38 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "3929a2aa",
+   "metadata": {
+    "papermill": {
+     "duration": 0.008255,
+     "end_time": "2025-11-24T20:22:05.490131",
+     "exception": false,
+     "start_time": "2025-11-24T20:22:05.481876",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 8. Update the Agent's instruction and toolset"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 19,
-   "id": "d94f823f",
+   "id": "dc8c8fb8",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:11.605963Z",
-     "iopub.status.busy": "2025-11-24T19:46:11.605402Z",
-     "iopub.status.idle": "2025-11-24T19:46:11.610294Z",
-     "shell.execute_reply": "2025-11-24T19:46:11.609460Z"
+     "iopub.execute_input": "2025-11-24T20:22:05.509030Z",
+     "iopub.status.busy": "2025-11-24T20:22:05.508713Z",
+     "iopub.status.idle": "2025-11-24T20:22:05.514467Z",
+     "shell.execute_reply": "2025-11-24T20:22:05.513468Z"
     },
     "papermill": {
-     "duration": 0.015889,
-     "end_time": "2025-11-24T19:46:11.611859",
+     "duration": 0.017623,
+     "end_time": "2025-11-24T20:22:05.516038",
      "exception": false,
-     "start_time": "2025-11-24T19:46:11.595970",
+     "start_time": "2025-11-24T20:22:05.498415",
      "status": "completed"
     },
     "tags": []
@@ -942,19 +1096,19 @@
   {
    "cell_type": "code",
    "execution_count": 20,
-   "id": "27697747",
+   "id": "d19cf02b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:11.629364Z",
-     "iopub.status.busy": "2025-11-24T19:46:11.628734Z",
-     "iopub.status.idle": "2025-11-24T19:46:11.633513Z",
-     "shell.execute_reply": "2025-11-24T19:46:11.632694Z"
+     "iopub.execute_input": "2025-11-24T20:22:05.534588Z",
+     "iopub.status.busy": "2025-11-24T20:22:05.534229Z",
+     "iopub.status.idle": "2025-11-24T20:22:05.540489Z",
+     "shell.execute_reply": "2025-11-24T20:22:05.539389Z"
     },
     "papermill": {
-     "duration": 0.015057,
-     "end_time": "2025-11-24T19:46:11.634801",
+     "duration": 0.017832,
+     "end_time": "2025-11-24T20:22:05.542318",
      "exception": false,
-     "start_time": "2025-11-24T19:46:11.619744",
+     "start_time": "2025-11-24T20:22:05.524486",
      "status": "completed"
     },
     "tags": []
@@ -976,19 +1130,19 @@
   {
    "cell_type": "code",
    "execution_count": 21,
-   "id": "83fca79f",
+   "id": "8bde158c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:11.652365Z",
-     "iopub.status.busy": "2025-11-24T19:46:11.651712Z",
-     "iopub.status.idle": "2025-11-24T19:46:12.512800Z",
-     "shell.execute_reply": "2025-11-24T19:46:12.511617Z"
+     "iopub.execute_input": "2025-11-24T20:22:05.560694Z",
+     "iopub.status.busy": "2025-11-24T20:22:05.560339Z",
+     "iopub.status.idle": "2025-11-24T20:22:06.621838Z",
+     "shell.execute_reply": "2025-11-24T20:22:06.620626Z"
     },
     "papermill": {
-     "duration": 0.871388,
-     "end_time": "2025-11-24T19:46:12.514207",
+     "duration": 1.072517,
+     "end_time": "2025-11-24T20:22:06.623368",
      "exception": false,
-     "start_time": "2025-11-24T19:46:11.642819",
+     "start_time": "2025-11-24T20:22:05.550851",
      "status": "completed"
     },
     "tags": []
@@ -1013,19 +1167,19 @@
   {
    "cell_type": "code",
    "execution_count": 22,
-   "id": "577c0bf4",
+   "id": "d3453e5d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:12.531678Z",
-     "iopub.status.busy": "2025-11-24T19:46:12.531388Z",
-     "iopub.status.idle": "2025-11-24T19:46:12.536209Z",
-     "shell.execute_reply": "2025-11-24T19:46:12.535164Z"
+     "iopub.execute_input": "2025-11-24T20:22:06.645392Z",
+     "iopub.status.busy": "2025-11-24T20:22:06.645056Z",
+     "iopub.status.idle": "2025-11-24T20:22:06.650219Z",
+     "shell.execute_reply": "2025-11-24T20:22:06.648707Z"
     },
     "papermill": {
-     "duration": 0.0154,
-     "end_time": "2025-11-24T19:46:12.537845",
+     "duration": 0.018706,
+     "end_time": "2025-11-24T20:22:06.652287",
      "exception": false,
-     "start_time": "2025-11-24T19:46:12.522445",
+     "start_time": "2025-11-24T20:22:06.633581",
      "status": "completed"
     },
     "tags": []
@@ -1038,19 +1192,19 @@
   {
    "cell_type": "code",
    "execution_count": 23,
-   "id": "e683e4a3",
+   "id": "4f417d70",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:12.555486Z",
-     "iopub.status.busy": "2025-11-24T19:46:12.554836Z",
-     "iopub.status.idle": "2025-11-24T19:46:12.558490Z",
-     "shell.execute_reply": "2025-11-24T19:46:12.557779Z"
+     "iopub.execute_input": "2025-11-24T20:22:06.672865Z",
+     "iopub.status.busy": "2025-11-24T20:22:06.672075Z",
+     "iopub.status.idle": "2025-11-24T20:22:06.676648Z",
+     "shell.execute_reply": "2025-11-24T20:22:06.675616Z"
     },
     "papermill": {
-     "duration": 0.014151,
-     "end_time": "2025-11-24T19:46:12.560034",
+     "duration": 0.016295,
+     "end_time": "2025-11-24T20:22:06.678305",
      "exception": false,
-     "start_time": "2025-11-24T19:46:12.545883",
+     "start_time": "2025-11-24T20:22:06.662010",
      "status": "completed"
     },
     "tags": []
@@ -1063,19 +1217,19 @@
   {
    "cell_type": "code",
    "execution_count": 24,
-   "id": "aee8946e",
+   "id": "c5ebf179",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:12.577102Z",
-     "iopub.status.busy": "2025-11-24T19:46:12.576354Z",
-     "iopub.status.idle": "2025-11-24T19:46:12.580188Z",
-     "shell.execute_reply": "2025-11-24T19:46:12.579436Z"
+     "iopub.execute_input": "2025-11-24T20:22:06.698412Z",
+     "iopub.status.busy": "2025-11-24T20:22:06.698045Z",
+     "iopub.status.idle": "2025-11-24T20:22:06.702454Z",
+     "shell.execute_reply": "2025-11-24T20:22:06.701373Z"
     },
     "papermill": {
-     "duration": 0.013727,
-     "end_time": "2025-11-24T19:46:12.581811",
+     "duration": 0.01641,
+     "end_time": "2025-11-24T20:22:06.704355",
      "exception": false,
-     "start_time": "2025-11-24T19:46:12.568084",
+     "start_time": "2025-11-24T20:22:06.687945",
      "status": "completed"
     },
     "tags": []
@@ -1086,21 +1240,38 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "50caa5ad",
+   "metadata": {
+    "papermill": {
+     "duration": 0.008744,
+     "end_time": "2025-11-24T20:22:06.721880",
+     "exception": false,
+     "start_time": "2025-11-24T20:22:06.713136",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 9. Information Analysis and Report Generator Agent"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 25,
-   "id": "0a9b4ede",
+   "id": "d41246d3",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:12.599511Z",
-     "iopub.status.busy": "2025-11-24T19:46:12.599176Z",
-     "iopub.status.idle": "2025-11-24T19:46:12.605382Z",
-     "shell.execute_reply": "2025-11-24T19:46:12.604342Z"
+     "iopub.execute_input": "2025-11-24T20:22:06.741223Z",
+     "iopub.status.busy": "2025-11-24T20:22:06.740473Z",
+     "iopub.status.idle": "2025-11-24T20:22:06.748061Z",
+     "shell.execute_reply": "2025-11-24T20:22:06.747061Z"
     },
     "papermill": {
-     "duration": 0.01707,
-     "end_time": "2025-11-24T19:46:12.606968",
+     "duration": 0.0193,
+     "end_time": "2025-11-24T20:22:06.749643",
      "exception": false,
-     "start_time": "2025-11-24T19:46:12.589898",
+     "start_time": "2025-11-24T20:22:06.730343",
      "status": "completed"
     },
     "tags": []
@@ -1205,19 +1376,19 @@
   {
    "cell_type": "code",
    "execution_count": 26,
-   "id": "68c1fb95",
+   "id": "33e6c396",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:12.624701Z",
-     "iopub.status.busy": "2025-11-24T19:46:12.624370Z",
-     "iopub.status.idle": "2025-11-24T19:46:12.638821Z",
-     "shell.execute_reply": "2025-11-24T19:46:12.637694Z"
+     "iopub.execute_input": "2025-11-24T20:22:06.768810Z",
+     "iopub.status.busy": "2025-11-24T20:22:06.768310Z",
+     "iopub.status.idle": "2025-11-24T20:22:06.782835Z",
+     "shell.execute_reply": "2025-11-24T20:22:06.781778Z"
     },
     "papermill": {
-     "duration": 0.02541,
-     "end_time": "2025-11-24T19:46:12.640489",
+     "duration": 0.026284,
+     "end_time": "2025-11-24T20:22:06.784510",
      "exception": false,
-     "start_time": "2025-11-24T19:46:12.615079",
+     "start_time": "2025-11-24T20:22:06.758226",
      "status": "completed"
     },
     "tags": []
@@ -1428,19 +1599,19 @@
   {
    "cell_type": "code",
    "execution_count": 27,
-   "id": "a3caa39d",
+   "id": "93029fa5",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:12.658646Z",
-     "iopub.status.busy": "2025-11-24T19:46:12.657732Z",
-     "iopub.status.idle": "2025-11-24T19:46:12.663762Z",
-     "shell.execute_reply": "2025-11-24T19:46:12.662697Z"
+     "iopub.execute_input": "2025-11-24T20:22:06.803788Z",
+     "iopub.status.busy": "2025-11-24T20:22:06.803143Z",
+     "iopub.status.idle": "2025-11-24T20:22:06.809388Z",
+     "shell.execute_reply": "2025-11-24T20:22:06.808242Z"
     },
     "papermill": {
-     "duration": 0.016954,
-     "end_time": "2025-11-24T19:46:12.665342",
+     "duration": 0.017396,
+     "end_time": "2025-11-24T20:22:06.811020",
      "exception": false,
-     "start_time": "2025-11-24T19:46:12.648388",
+     "start_time": "2025-11-24T20:22:06.793624",
      "status": "completed"
     },
     "tags": []
@@ -1483,21 +1654,38 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "c3f89ec4",
+   "metadata": {
+    "papermill": {
+     "duration": 0.008443,
+     "end_time": "2025-11-24T20:22:06.827988",
+     "exception": false,
+     "start_time": "2025-11-24T20:22:06.819545",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 10. Medical Pre-Authorization Support"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 28,
-   "id": "998b16fd",
+   "id": "2e2d101a",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:12.682684Z",
-     "iopub.status.busy": "2025-11-24T19:46:12.681953Z",
-     "iopub.status.idle": "2025-11-24T19:46:12.689171Z",
-     "shell.execute_reply": "2025-11-24T19:46:12.687980Z"
+     "iopub.execute_input": "2025-11-24T20:22:06.847275Z",
+     "iopub.status.busy": "2025-11-24T20:22:06.846290Z",
+     "iopub.status.idle": "2025-11-24T20:22:06.853569Z",
+     "shell.execute_reply": "2025-11-24T20:22:06.852627Z"
     },
     "papermill": {
-     "duration": 0.017544,
-     "end_time": "2025-11-24T19:46:12.690512",
+     "duration": 0.018916,
+     "end_time": "2025-11-24T20:22:06.855289",
      "exception": false,
-     "start_time": "2025-11-24T19:46:12.672968",
+     "start_time": "2025-11-24T20:22:06.836373",
      "status": "completed"
     },
     "tags": []
@@ -1580,19 +1768,19 @@
   {
    "cell_type": "code",
    "execution_count": 29,
-   "id": "96a979b4",
+   "id": "d777bcfd",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:12.708250Z",
-     "iopub.status.busy": "2025-11-24T19:46:12.707864Z",
-     "iopub.status.idle": "2025-11-24T19:46:12.713645Z",
-     "shell.execute_reply": "2025-11-24T19:46:12.712682Z"
+     "iopub.execute_input": "2025-11-24T20:22:06.874447Z",
+     "iopub.status.busy": "2025-11-24T20:22:06.873329Z",
+     "iopub.status.idle": "2025-11-24T20:22:06.879248Z",
+     "shell.execute_reply": "2025-11-24T20:22:06.878167Z"
     },
     "papermill": {
-     "duration": 0.016531,
-     "end_time": "2025-11-24T19:46:12.715246",
+     "duration": 0.017055,
+     "end_time": "2025-11-24T20:22:06.880847",
      "exception": false,
-     "start_time": "2025-11-24T19:46:12.698715",
+     "start_time": "2025-11-24T20:22:06.863792",
      "status": "completed"
     },
     "tags": []
@@ -1614,19 +1802,19 @@
   {
    "cell_type": "code",
    "execution_count": 30,
-   "id": "95100b99",
+   "id": "9f64e108",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:12.732346Z",
-     "iopub.status.busy": "2025-11-24T19:46:12.732069Z",
-     "iopub.status.idle": "2025-11-24T19:46:14.778547Z",
-     "shell.execute_reply": "2025-11-24T19:46:14.777574Z"
+     "iopub.execute_input": "2025-11-24T20:22:06.901517Z",
+     "iopub.status.busy": "2025-11-24T20:22:06.901173Z",
+     "iopub.status.idle": "2025-11-24T20:22:09.534025Z",
+     "shell.execute_reply": "2025-11-24T20:22:09.532769Z"
     },
     "papermill": {
-     "duration": 2.056806,
-     "end_time": "2025-11-24T19:46:14.779820",
+     "duration": 2.649399,
+     "end_time": "2025-11-24T20:22:09.539012",
      "exception": false,
-     "start_time": "2025-11-24T19:46:12.723014",
+     "start_time": "2025-11-24T20:22:06.889613",
      "status": "completed"
     },
     "tags": []
@@ -1653,12 +1841,15 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "root_agent > Hello! I'm a medical pre-authorization agent. I can help you process your pre-authorization request for medical treatments. To do this, I need two documents from you:\n",
+      "root_agent > Hello! I'm your medical pre-authorization agent. I can help you process your pre-authorization request for a treatment by extracting details from your medical records and insurance policy, analyzing them, and then providing a report on the decision.\n",
       "\n",
-      "1.  Your medical records related to the treatment (Visual Acuity).\n",
-      "2.  Your health insurance policy document.\n",
+      "I see you've mentioned \"Visual Acuity.\" Is this the treatment you are seeking pre-authorization for?\n",
       "\n",
-      "Could you please provide these documents?\n"
+      "To proceed with your pre-authorization request for \"Visual Acuity,\" I'll need two documents from you:\n",
+      "1. Your medical records related to the \"Visual Acuity\" treatment.\n",
+      "2. Your health insurance policy document.\n",
+      "\n",
+      "Please upload these documents, clearly indicating which document is which.\n"
      ]
     }
    ],
@@ -1670,19 +1861,19 @@
   {
    "cell_type": "code",
    "execution_count": 31,
-   "id": "9d04c9a3",
+   "id": "16a4bd4c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:14.797812Z",
-     "iopub.status.busy": "2025-11-24T19:46:14.797544Z",
-     "iopub.status.idle": "2025-11-24T19:46:15.843896Z",
-     "shell.execute_reply": "2025-11-24T19:46:15.842828Z"
+     "iopub.execute_input": "2025-11-24T20:22:09.560219Z",
+     "iopub.status.busy": "2025-11-24T20:22:09.559675Z",
+     "iopub.status.idle": "2025-11-24T20:22:11.532911Z",
+     "shell.execute_reply": "2025-11-24T20:22:11.531761Z"
     },
     "papermill": {
-     "duration": 1.058192,
-     "end_time": "2025-11-24T19:46:15.845235",
+     "duration": 1.990211,
+     "end_time": "2025-11-24T20:22:11.538205",
      "exception": false,
-     "start_time": "2025-11-24T19:46:14.787043",
+     "start_time": "2025-11-24T20:22:09.547994",
      "status": "completed"
     },
     "tags": []
@@ -1735,9 +1926,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "root_agent > Thank you for providing your health insurance policy certificate. I have the insurance details now.\n",
+      "root_agent > Thank you for providing your health insurance policy certificate. This looks like the insurance policy document I need.\n",
       "\n",
-      "To proceed with your pre-authorization request for Visual Acuity, I still need your medical records related to this treatment. Please provide them so I can analyze the necessity of the treatment and verify your eligibility.\n"
+      "Do you also have your medical records related to the \"Visual Acuity\" treatment? Please provide that document as well so I can proceed with extracting the necessary information for your pre-authorization request.\n"
      ]
     }
    ],
@@ -1772,21 +1963,38 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "79e2a075",
+   "metadata": {
+    "papermill": {
+     "duration": 0.008869,
+     "end_time": "2025-11-24T20:22:11.556262",
+     "exception": false,
+     "start_time": "2025-11-24T20:22:11.547393",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": [
+    "# 11. iMedic -> Medical agent Working"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 32,
-   "id": "3476ca7e",
+   "id": "bd502645",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:15.863392Z",
-     "iopub.status.busy": "2025-11-24T19:46:15.863093Z",
-     "iopub.status.idle": "2025-11-24T19:46:15.868051Z",
-     "shell.execute_reply": "2025-11-24T19:46:15.867336Z"
+     "iopub.execute_input": "2025-11-24T20:22:11.577590Z",
+     "iopub.status.busy": "2025-11-24T20:22:11.576654Z",
+     "iopub.status.idle": "2025-11-24T20:22:11.582887Z",
+     "shell.execute_reply": "2025-11-24T20:22:11.581846Z"
     },
     "papermill": {
-     "duration": 0.015869,
-     "end_time": "2025-11-24T19:46:15.869471",
+     "duration": 0.019174,
+     "end_time": "2025-11-24T20:22:11.584379",
      "exception": false,
-     "start_time": "2025-11-24T19:46:15.853602",
+     "start_time": "2025-11-24T20:22:11.565205",
      "status": "completed"
     },
     "tags": []
@@ -1820,19 +2028,19 @@
   {
    "cell_type": "code",
    "execution_count": 33,
-   "id": "16745543",
+   "id": "0b22973c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:15.887879Z",
-     "iopub.status.busy": "2025-11-24T19:46:15.887470Z",
-     "iopub.status.idle": "2025-11-24T19:46:16.992585Z",
-     "shell.execute_reply": "2025-11-24T19:46:16.991678Z"
+     "iopub.execute_input": "2025-11-24T20:22:11.604236Z",
+     "iopub.status.busy": "2025-11-24T20:22:11.603448Z",
+     "iopub.status.idle": "2025-11-24T20:22:12.802049Z",
+     "shell.execute_reply": "2025-11-24T20:22:12.800813Z"
     },
     "papermill": {
-     "duration": 1.116185,
-     "end_time": "2025-11-24T19:46:16.994068",
+     "duration": 1.210535,
+     "end_time": "2025-11-24T20:22:12.803789",
      "exception": false,
-     "start_time": "2025-11-24T19:46:15.877883",
+     "start_time": "2025-11-24T20:22:11.593254",
      "status": "completed"
     },
     "tags": []
@@ -1849,11 +2057,11 @@
       "User > What type of agent you use? and what type of work you can do\n",
       "medical_agent > I am a smart doctor booking and medicine order assistant and also a medical pre-authorization agent. I can help you with:\n",
       "\n",
-      "1. **Doctor Booking:** Booking appointments with doctors.\n",
-      "2. **Medicine Orders:** Ordering medicines online.\n",
-      "3. **Medical Pre-authorization:** Processing pre-authorization requests for treatments.\n",
+      "1.  **Booking Doctor Appointments**: I can use the `book_doctor_appointment()` tool or the `medical_booking_order_agent` to schedule appointments for you.\n",
+      "2.  **Ordering Medicines**: I can use the `book_medicine_online()` tool or the `medical_booking_order_agent` to help you order medications.\n",
+      "3.  **Medical Pre-authorization**: I can act as a medical pre-authorization agent using the `root_agent` to process your pre-authorization requests.\n",
       "\n",
-      "I utilize `medical_booking_order_agent` for booking and ordering, and `root_agent` for pre-authorization requests.\n"
+      "I will also ensure to check the status of each request and provide a detailed breakdown of the outcome, including any fees involved.\n"
      ]
     }
    ],
@@ -1866,19 +2074,19 @@
   {
    "cell_type": "code",
    "execution_count": 34,
-   "id": "bfaca105",
+   "id": "48a1b442",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2025-11-24T19:46:17.013053Z",
-     "iopub.status.busy": "2025-11-24T19:46:17.012258Z",
-     "iopub.status.idle": "2025-11-24T19:46:18.028178Z",
-     "shell.execute_reply": "2025-11-24T19:46:18.027111Z"
+     "iopub.execute_input": "2025-11-24T20:22:12.823883Z",
+     "iopub.status.busy": "2025-11-24T20:22:12.823537Z",
+     "iopub.status.idle": "2025-11-24T20:22:16.079371Z",
+     "shell.execute_reply": "2025-11-24T20:22:16.078275Z"
     },
     "papermill": {
-     "duration": 1.026584,
-     "end_time": "2025-11-24T19:46:18.029469",
+     "duration": 3.267944,
+     "end_time": "2025-11-24T20:22:16.081009",
      "exception": false,
-     "start_time": "2025-11-24T19:46:17.002885",
+     "start_time": "2025-11-24T20:22:12.813065",
      "status": "completed"
     },
     "tags": []
@@ -1892,21 +2100,59 @@
       " ### Continue session: debug_session_id\n",
       "\n",
       "User > what is medical pre_authorization\n",
-      "medical_agent > Medical pre-authorization, also known as pre-approval or prior authorization, is a process where your health insurance company's approval is required *before* you receive certain medical services or prescription drugs.\n",
+      "medical_agent > Medical pre-authorization, also known as prior authorization or pre-approval, is a process where your health insurance company reviews and approves or denies a requested medical service, procedure, or medication *before* you receive it.\n",
       "\n",
-      "The purpose of pre-authorization is to ensure that the proposed treatment or medication is:\n",
+      "Here's a breakdown of what that means:\n",
       "\n",
-      "*   **Medically necessary:** It's a required service for your condition.\n",
-      "*   **Appropriate:** It's the right treatment for your diagnosis.\n",
-      "*   **Cost-effective:** It's a reasonable and covered service under your plan.\n",
+      "*   **Purpose:** The main goal for insurance companies is to ensure that the medical service is:\n",
+      "    *   **Medically necessary:** It's required for your condition and is the most appropriate treatment.\n",
+      "    *   **Cost-effective:** It's a reasonable and not excessively expensive option compared to alternatives.\n",
+      "    *   **Within the plan's benefits:** The service is covered by your insurance policy.\n",
       "\n",
-      "If you need to get pre-authorization for a treatment, I can help you with that using the `root_agent`.\n"
+      "*   **Who initiates it:** Typically, your doctor's office or healthcare provider initiates the pre-authorization process. They submit documentation (medical records, test results, treatment plans) to your insurance company for review.\n",
+      "\n",
+      "*   **What needs pre-authorization:** This varies by insurance plan and the specific service, but common examples include:\n",
+      "    *   Certain surgeries or procedures (e.g., knee replacement, tonsillectomy)\n",
+      "    *   Hospital stays (especially planned ones)\n",
+      "    *   Expensive diagnostic tests (e.g., MRI, CT scans)\n",
+      "    *   Specialty medications (e.g., biologics, chemotherapy drugs)\n",
+      "    *   Durable medical equipment (e.g., wheelchairs, hospital beds)\n",
+      "    *   Out-of-network care\n",
+      "\n",
+      "*   **The process:**\n",
+      "    1.  Your doctor recommends a service.\n",
+      "    2.  Your doctor's office requests pre-authorization from your insurance company.\n",
+      "    3.  The insurance company reviews the request based on their guidelines and your medical history.\n",
+      "    4.  The insurance company makes a decision (approve, deny, or request more information).\n",
+      "    5.  If approved, you can proceed with the service. If denied, you or your doctor may have the option to appeal the decision.\n",
+      "\n",
+      "*   **Why it's important for you:**\n",
+      "    *   **Avoid unexpected costs:** If a service isn't pre-authorized and is deemed not medically necessary or not covered, you could be responsible for the entire bill.\n",
+      "    *   **Ensure coverage:** It confirms that your insurance will help pay for the service.\n",
+      "    *   **Peace of mind:** Knowing that your treatment is approved can reduce stress.\n",
+      "\n",
+      "In essence, it's a gatekeeping mechanism used by insurance companies to manage costs and ensure that treatments meet certain criteria before they pay for them.\n"
      ]
     }
    ],
    "source": [
     "response = await runner.run_debug(\"what is medical pre_authorization\")"
    ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fb7fb0e6",
+   "metadata": {
+    "papermill": {
+     "duration": 0.009014,
+     "end_time": "2025-11-24T20:22:16.099264",
+     "exception": false,
+     "start_time": "2025-11-24T20:22:16.090250",
+     "status": "completed"
+    },
+    "tags": []
+   },
+   "source": []
   }
  ],
  "metadata": {
@@ -1938,14 +2184,14 @@
   },
   "papermill": {
    "default_parameters": {},
-   "duration": 82.973019,
-   "end_time": "2025-11-24T19:46:20.890416",
+   "duration": 77.350445,
+   "end_time": "2025-11-24T20:22:18.945347",
    "environment_variables": {},
    "exception": null,
    "input_path": "__notebook__.ipynb",
    "output_path": "__notebook__.ipynb",
    "parameters": {},
-   "start_time": "2025-11-24T19:44:57.917397",
+   "start_time": "2025-11-24T20:21:01.594902",
    "version": "2.6.0"
   }
  },
